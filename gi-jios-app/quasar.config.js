@@ -10,7 +10,37 @@
 
 
 const { configure } = require('quasar/wrappers');
+const fs = require('fs');
+const path = require('path');
 
+const loadLocalEnv = () => {
+  const envPath = path.resolve(__dirname, '.env.local');
+
+  if (!fs.existsSync(envPath)) {
+    return {};
+  }
+
+  return fs.readFileSync(envPath, 'utf8')
+    .split(/\r?\n/)
+    .reduce((env, line) => {
+      const trimmedLine = line.trim();
+      const separatorIndex = trimmedLine.indexOf('=');
+
+      if (!trimmedLine || trimmedLine.startsWith('#') || separatorIndex === -1) {
+        return env;
+      }
+
+      const key = trimmedLine.slice(0, separatorIndex).trim();
+      const value = trimmedLine.slice(separatorIndex + 1).trim();
+
+      return {
+        ...env,
+        [key]: value
+      };
+    }, {});
+};
+
+const localEnv = loadLocalEnv();
 
 module.exports = configure(function (/* ctx */) {
   return {
@@ -59,6 +89,9 @@ module.exports = configure(function (/* ctx */) {
         browser: [ 'es2019', 'edge88', 'firefox78', 'chrome87', 'safari13.1' ],
         node: 'node16'
       },
+      env: {
+        MAPBOX_ACCESS_TOKEN: process.env.MAPBOX_ACCESS_TOKEN || localEnv.MAPBOX_ACCESS_TOKEN || ''
+      },
 
       vueRouterMode: 'hash', // available values: 'hash', 'history'
       // vueRouterBase,
@@ -76,7 +109,16 @@ module.exports = configure(function (/* ctx */) {
       // polyfillModulePreload: true,
       // distDir
 
-      // extendViteConf (viteConf) {},
+      extendViteConf (viteConf) {
+        viteConf.optimizeDeps = {
+          ...(viteConf.optimizeDeps || {}),
+          exclude: [
+            ...((viteConf.optimizeDeps && viteConf.optimizeDeps.exclude) || []),
+            'mapbox-gl',
+            'mapbox-gl/dist/esm/mapbox-gl.js'
+          ]
+        };
+      },
       // viteVuePluginOptions: {},
 
       

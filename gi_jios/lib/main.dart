@@ -1,71 +1,77 @@
 import 'package:flutter/material.dart';
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  MapboxOptions.setAccessToken(
+    "pk.eyJ1Ijoia2ltaXlhbmciLCJhIjoiY21wMGxhbHFpMWlzdjJ4b2ZzcWo3cjY5ZCJ9.kLYgUejkShnMvdT-K3NaWw",
+  );
+
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  MapboxMap? mapboxMap;
+
+  Future<void> _zoomIn() async {
+    if (mapboxMap == null) return;
+
+    final cameraState = await mapboxMap!.getCameraState();
+    final newZoom = cameraState.zoom + 1;
+
+    await mapboxMap!.flyTo(
+      CameraOptions(
+        zoom: newZoom,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      MapAnimationOptions(
+        duration: 500,
+      ),
     );
   }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application.
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State.
-      _counter++;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called.
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+    final CameraOptions camera = CameraOptions(
+      center: Point(coordinates: Position(-98.0, 39.5)),
+      zoom: 2,
+      bearing: 0,
+      pitch: 0,
+    );
+
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        body: Stack(
+          children: [
+            MapWidget(
+              cameraOptions: camera,
+              styleUri: "mapbox://styles/kimiyang/cmp11y75m000b01s7fr3615v9",
+              onMapCreated: (MapboxMap controller) {
+                mapboxMap = controller;
+              },
+              onStyleLoadedListener: (StyleLoadedEventData data) {
+                debugPrint("Map style loaded successfully");
+              },
+            ),
+
+            Positioned(
+              right: 16,
+              bottom: 32,
+              child: FloatingActionButton(
+                onPressed: _zoomIn,
+                child: const Icon(Icons.add),
+              ),
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }
