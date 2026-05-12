@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart' as geo;
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
   MapboxOptions.setAccessToken(
-    "pk.eyJ1Ijoia2ltaXlhbmciLCJhIjoiY21wMGxhbHFpMWlzdjJ4b2ZzcWo3cjY5ZCJ9.kLYgUejkShnMvdT-K3NaWw",
+    "YOUR_MAPBOX_ACCESS_TOKEN",
   );
 
   runApp(const MyApp());
@@ -20,6 +21,58 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   MapboxMap? map;
+
+  geo.Position? userPosition;
+  bool isLoadingLocation = true;
+
+  @override
+  void initState() {
+    super.initState();
+    getUserLocation();
+  }
+
+  Future<void> getUserLocation() async {
+    try {
+      bool serviceEnabled = await geo.Geolocator.isLocationServiceEnabled();
+
+      if (!serviceEnabled) {
+        setState(() {
+          isLoadingLocation = false;
+        });
+        return;
+      }
+
+      geo.LocationPermission permission =
+          await geo.Geolocator.checkPermission();
+
+      if (permission == geo.LocationPermission.denied) {
+        permission = await geo.Geolocator.requestPermission();
+      }
+
+      if (permission == geo.LocationPermission.denied ||
+          permission == geo.LocationPermission.deniedForever) {
+        setState(() {
+          isLoadingLocation = false;
+        });
+        return;
+      }
+
+      final position = await geo.Geolocator.getCurrentPosition(
+        locationSettings: const geo.LocationSettings(
+          accuracy: geo.LocationAccuracy.high,
+        ),
+      );
+
+      setState(() {
+        userPosition = position;
+        isLoadingLocation = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoadingLocation = false;
+      });
+    }
+  }
 
   Future<void> zoomIn() async {
     if (map == null) return;
@@ -53,6 +106,20 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    if (isLoadingLocation) {
+      return const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          body: Center(
+            child: CircularProgressIndicator(),
+          ),
+        ),
+      );
+    }
+
+    final double longitude = userPosition?.longitude ?? 103.7764;
+    final double latitude = userPosition?.latitude ?? 1.2966;
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -61,15 +128,25 @@ class _MyAppState extends State<MyApp> {
             MapWidget(
               viewport: CameraViewportState(
                 center: Point(
-                  coordinates: Position(-98.0, 39.5),
+                  coordinates: Position(longitude, latitude),
                 ),
-                zoom: 2,
+                zoom: 15,
                 bearing: 0,
                 pitch: 0,
               ),
               styleUri: "mapbox://styles/kimiyang/cmp11y75m000b01s7fr3615v9",
-              onMapCreated: (controller) {
+              onMapCreated: (controller) async {
                 map = controller;
+
+                await map!.scaleBar.updateSettings(
+                  ScaleBarSettings(enabled: false),
+                );
+
+                if (userPosition != null) {
+                  await map!.location.updateSettings(
+                    LocationComponentSettings(enabled: true),
+                  );
+                }
               },
             ),
 
