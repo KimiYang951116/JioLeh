@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:gi_jios/config/map_env.dart';
+import 'package:gi_jios/config/supabase_env.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart' as geo;
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -8,6 +10,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+import 'config/validate_env.dart';
 /*
 For this example to work, you need to provide the following dart-define values:
 - MAPBOX_ACCESS_TOKEN: Your Mapbox access token.
@@ -17,59 +20,18 @@ For this example to work, you need to provide the following dart-define values:
 You can provide these values when running the app using the --dart-define flag:
 */
 
-const String mapboxAccessToken = String.fromEnvironment(
-  'MAPBOX_ACCESS_TOKEN',
-);
 
-const String supabaseUrl = String.fromEnvironment(
-  'SUPABASE_URL',
-);
-
-const String supabaseAnonKey = String.fromEnvironment(
-  'SUPABASE_ANON_KEY',
-);
-
-const String mapboxStyleUri = String.fromEnvironment(
-  'MAPBOX_STYLE_URI',
-);
-
-
-void validateEnvironment() {
-  final missingValues = [];
-
-  if (mapboxAccessToken.isEmpty) {
-    missingValues.add('MAPBOX_ACCESS_TOKEN');
-  }
-
-  if (supabaseUrl.isEmpty) {
-    missingValues.add('SUPABASE_URL');
-  }
-
-  if (supabaseAnonKey.isEmpty) {
-    missingValues.add('SUPABASE_ANON_KEY');
-  }
-
-  if (mapboxStyleUri.isEmpty) {
-    missingValues.add('MAPBOX_STYLE_URI');
-  }
-
-  if (missingValues.isNotEmpty) {
-    throw StateError(
-      'Missing dart-define values: ${missingValues.join(', ')}',
-    );
-  }
-}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  validateEnvironment();
+  ValidateEnv.validateEnvironment();
 
-  MapboxOptions.setAccessToken(mapboxAccessToken);
+  MapboxOptions.setAccessToken(MapEnv.mapboxAccessToken);
 
   await Supabase.initialize(
-    url: supabaseUrl,
-    anonKey: supabaseAnonKey,
+    url: SupabaseEnv.supabaseUrl,
+    anonKey: SupabaseEnv.supabaseAnonKey,
   );
 
   runApp(const MyApp());
@@ -91,8 +53,8 @@ class _MyAppState extends State<MyApp> {
   String currentLocationName = 'Finding your location...';
   bool isLoadingLocationName = false;
 
-DateTime? lastReverseGeocodeTime;
-geo.Position? lastReverseGeocodedPosition;
+  DateTime? lastReverseGeocodeTime;
+  geo.Position? lastReverseGeocodedPosition;
 
   geo.Position? userPosition;
   StreamSubscription<geo.Position>? positionStreamSubscription;
@@ -338,9 +300,8 @@ geo.Position? lastReverseGeocodedPosition;
             ),
           ),
           circleRadius: 9.0,
-          circleColor: Colors.red.value,
-          circleStrokeWidth: 2.0,
-          circleStrokeColor: Colors.white.value,
+          circleColor: Colors.red.toARGB32(),
+          circleStrokeColor: Colors.white.toARGB32(),
         ),
       );
     }
@@ -399,7 +360,7 @@ geo.Position? lastReverseGeocodedPosition;
         'latitude': latitude.toString(),
         'longitude': longitude.toString(),
         'language': 'en',
-        'access_token': mapboxAccessToken,
+        'access_token': MapEnv.mapboxAccessToken,
       },
     );
 
@@ -530,7 +491,7 @@ geo.Position? lastReverseGeocodedPosition;
                 bearing: 0,
                 pitch: 60,
               ),
-              styleUri: mapboxStyleUri,
+              styleUri: MapEnv.mapboxStyleUri,
               onMapCreated: (controller) async {
                 map = controller;
 
@@ -566,7 +527,7 @@ geo.Position? lastReverseGeocodedPosition;
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.15),
+                        color: Colors.white,
                         blurRadius: 16,
                         offset: const Offset(0, 6),
                       ),
