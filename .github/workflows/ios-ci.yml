@@ -112,10 +112,12 @@ jobs:
         env:
           APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
         run: |
+          DELIMITER="APP_STORE_PRIVATE_KEY_$(uuidgen)"
+
           {
-            echo 'private-key<<EOF'
+            echo "private-key<<$DELIMITER"
             echo "$APP_STORE_CONNECT_API_KEY_CONTENT" | base64 -D
-            echo EOF
+            printf '\n%s\n' "$DELIMITER"
           } >> "$GITHUB_OUTPUT"
 
       - name: Prepare IPA for upload
