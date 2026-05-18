@@ -1,4 +1,4 @@
-name: Android Release
+name: "Build (& Deploy to Google Play) Android APP"
 
 on:
   push:
@@ -6,8 +6,8 @@ on:
       - 'v*.*.*'
 
 jobs:
-  android-release:
-    name: Build & Upload Android
+  build-android:
+    name: Build Android App
     runs-on: ubuntu-latest
 
     defaults:
@@ -15,9 +15,22 @@ jobs:
         working-directory: ./gi_jios
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - uses: subosito/flutter-action@v2
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: zulu
+          java-version: '21'
+          cache: gradle
+          cache-dependency-path: |
+            gi_jios/android/build.gradle.kts
+            gi_jios/android/app/build.gradle.kts
+            gi_jios/android/gradle/wrapper/gradle-wrapper.properties
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
@@ -25,15 +38,65 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build Android APK
+      - name: Configure Android release signing
+        env:
+          PLAY_SIGNING_KEY: ${{ secrets.PLAY_SIGNING_KEY }}
+          PLAY_SIGNING_KEY_ALIAS: ${{ secrets.PLAY_SIGNING_KEY_ALIAS }}
+          PLAY_SIGNING_KEY_STORE_PASSWORD: ${{ secrets.PLAY_SIGNING_KEY_STORE_PASSWORD }}
+          PLAY_SIGNING_KEY_PASSWORD: ${{ secrets.PLAY_SIGNING_KEY_PASSWORD }}
         run: |
-          flutter build apk --debug \
+          echo "$PLAY_SIGNING_KEY" | base64 --decode > android/app/upload-keystore.jks
+
+          {
+            echo "storeFile=upload-keystore.jks"
+            echo "storePassword=$PLAY_SIGNING_KEY_STORE_PASSWORD"
+            echo "keyAlias=$PLAY_SIGNING_KEY_ALIAS"
+            echo "keyPassword=$PLAY_SIGNING_KEY_PASSWORD"
+          } > android/key.properties
+
+      - name: Build Android App Bundle
+        run: |
+          flutter build appbundle --release \
             --dart-define=MAPBOX_ACCESS_TOKEN="${{ secrets.MAPBOX_ACCESS_TOKEN }}" \
             --dart-define=SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
             --dart-define=SUPABASE_ANON_KEY="${{ secrets.SUPABASE_ANON_KEY }}" \
             --dart-define=MAPBOX_STYLE_URI="${{ secrets.MAPBOX_STYLE_URI }}"
 
-      - uses: actions/upload-artifact@v4
+      - name: Archive Android build output
+        uses: actions/upload-artifact@v4
         with:
-          name: android-debug-apk-${{ github.ref_name }}
-          path: gi_jios/build/app/outputs/flutter-apk/app-debug.apk
+          name: android-build
+          path: gi_jios/build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+
+  deploy-android:
+    name: Deploy Android to Google Play
+    needs: build-android
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download Android build output
+        uses: actions/download-artifact@v5
+        with:
+          name: android-build
+          path: android-build
+
+      - name: Prepare AAB for upload
+        run: |
+          AAB_PATH="$(find android-build -name '*.aab' -print -quit)"
+
+          if [ -z "$AAB_PATH" ]; then
+            echo "No AAB found in android-build"
+            exit 1
+          fi
+
+          cp "$AAB_PATH" app-release.aab
+
+      - name: Deploy to Google Play
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          packageName: com.gijios.jioleh
+          releaseFiles: ./app-release.aab
+          track: internal
+          inAppUpdatePriority: 3
