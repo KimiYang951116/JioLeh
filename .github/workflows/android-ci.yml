@@ -1,13 +1,17 @@
 name: "Build (& Deploy to Google Play) Android APP"
+run-name: "Android Release ${{ github.ref_name }}"
 
 on:
   push:
     tags:
       - 'v*.*.*'
 
+permissions:
+  contents: write
+
 jobs:
   build-android:
-    name: Build Android App
+    name: Build Android App (${{ github.ref_name }})
     runs-on: ubuntu-latest
 
     defaults:
@@ -80,15 +84,27 @@ jobs:
             --dart-define=SUPABASE_ANON_KEY="${{ secrets.SUPABASE_ANON_KEY }}" \
             --dart-define=MAPBOX_STYLE_URI="${{ secrets.MAPBOX_STYLE_URI }}"
 
+      - name: Build Android APK
+        run: |
+          flutter build apk --release \
+            --build-name="$ANDROID_VERSION_NAME" \
+            --build-number="$ANDROID_BUILD_NUMBER" \
+            --dart-define=MAPBOX_ACCESS_TOKEN="${{ secrets.MAPBOX_ACCESS_TOKEN }}" \
+            --dart-define=SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
+            --dart-define=SUPABASE_ANON_KEY="${{ secrets.SUPABASE_ANON_KEY }}" \
+            --dart-define=MAPBOX_STYLE_URI="${{ secrets.MAPBOX_STYLE_URI }}"
+
       - name: Archive Android build output
         uses: actions/upload-artifact@v4
         with:
           name: android-build
-          path: gi_jios/build/app/outputs/bundle/release/app-release.aab
+          path: |
+            gi_jios/build/app/outputs/bundle/release/app-release.aab
+            gi_jios/build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
 
   deploy-android:
-    name: Deploy Android to Google Play
+    name: Deploy Android to Google Play (${{ github.ref_name }})
     needs: build-android
     runs-on: ubuntu-latest
 
@@ -102,14 +118,24 @@ jobs:
       - name: Prepare AAB for upload
         run: |
           AAB_PATH="$(find android-build -name '*.aab' -print -quit)"
+          APK_PATH="$(find android-build -name '*.apk' -print -quit)"
+          RELEASE_VERSION="${GITHUB_REF_NAME#v}"
 
           if [ -z "$AAB_PATH" ]; then
             echo "No AAB found in android-build"
             exit 1
           fi
 
+          if [ -z "$APK_PATH" ]; then
+            echo "No APK found in android-build"
+            exit 1
+          fi
+
           cp "$AAB_PATH" app-release.aab
-          ls -lh app-release.aab
+          cp "$APK_PATH" app-release.apk
+          cp "$AAB_PATH" "jio-leh-android-${RELEASE_VERSION}.aab"
+          cp "$APK_PATH" "jio-leh-android-${RELEASE_VERSION}.apk"
+          ls -lh app-release.aab app-release.apk jio-leh-android-*.aab jio-leh-android-*.apk
 
       - name: Validate Google Play service account
         env:
@@ -135,3 +161,11 @@ jobs:
           inAppUpdatePriority: 3
           status: completed
           changesNotSentForReview: false
+
+      - name: Upload Android files to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            jio-leh-android-*.aab
+            jio-leh-android-*.apk
+          fail_on_unmatched_files: true
