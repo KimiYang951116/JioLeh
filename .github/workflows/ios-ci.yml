@@ -32,6 +32,22 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Derive iOS release version
+        run: |
+          VERSION_NAME="${GITHUB_REF_NAME#v}"
+          BUILD_NUMBER="${GITHUB_RUN_NUMBER}"
+
+          if ! [[ "$VERSION_NAME" =~ ^[0-9]+(\.[0-9]+){1,2}$ ]]; then
+            echo "Tag '$GITHUB_REF_NAME' does not produce a valid iOS version name."
+            echo "Use a tag like v1.2.3."
+            exit 1
+          fi
+
+          {
+            echo "IOS_VERSION_NAME=$VERSION_NAME"
+            echo "IOS_BUILD_NUMBER=$BUILD_NUMBER"
+          } >> "$GITHUB_ENV"
+
       - name: Install the Apple certificate and provisioning profile
         env:
           APPLE_CERTIFICATE_BASE64: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
@@ -82,6 +98,8 @@ jobs:
       - name: Build iOS IPA
         run: |
           flutter build ipa --release \
+            --build-name="$IOS_VERSION_NAME" \
+            --build-number="$IOS_BUILD_NUMBER" \
             --export-options-plist="$RUNNER_TEMP/ExportOptions.plist" \
             --dart-define=MAPBOX_ACCESS_TOKEN="${{ secrets.MAPBOX_ACCESS_TOKEN }}" \
             --dart-define=SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
