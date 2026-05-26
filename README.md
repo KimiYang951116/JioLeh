@@ -1,10 +1,10 @@
-# Jio Leh
+# JioLeh!
 
 A Flutter-based location social media & gaming application.
 
 ## Overview
 
-Jio Leh is a cross-platform mobile application that allows users to:
+JioLeh! is a cross-platform mobile application that allows users to:
 
 * View their live location on an interactive Mapbox map
 * Pin locations directly onto the map
