@@ -49,13 +49,14 @@ class _MapPageState extends State<MapPage> {
     _booting();
   }
 
+  @override
   void dispose() {
     _location.dispose();
     super.dispose();
   }
 
-  // Main boot sequence to initialize location, map, and pins
   Future<void> _booting() async {
+    // Main boot sequence to initialize location, map, and pins
     await auth.signInIfNeeded();
     await _reloadPins();
     await _startLocationTracking();
@@ -63,6 +64,8 @@ class _MapPageState extends State<MapPage> {
 
   // Map Helper Methods
   Future<void> _enableMapboxLocationComponent() async {
+    // Enables the built-in Mapbox location component
+    // to show the user's current location on the map
     if (_map == null) return;
     await _map!.location.updateSettings(
       LocationComponentSettings(
@@ -73,7 +76,8 @@ class _MapPageState extends State<MapPage> {
       );
   }
 
-  Future<void> _moveCameraToPos(geo.Position position) async{
+  Future<void> _moveCameraToPos(geo.Position position) async {
+    // Moves the map camera to the specified position with animation
     if (_map == null) return; 
     await _map!.easeTo(
       CameraOptions(
@@ -94,6 +98,8 @@ class _MapPageState extends State<MapPage> {
   
   // Location Helper Methods
   Future<void> _startLocationTracking() async {
+    // Fetches the user's current location
+    // and starts real-time tracking of location updates
     final position = await _location.getCurrentLocation();
     if (!mounted) return;
 
