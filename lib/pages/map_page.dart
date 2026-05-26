@@ -85,28 +85,6 @@ class _MapPageState extends State<MapPage> {
         MapAnimationOptions(duration: 1000, startDelay: 0,), // animate movement over 1000 millisec
     );
   }
-
-  Future<void> _zoomIn() async{
-    if (_map == null) return; // prevent crash if map havent start
-    final cameraState = await _map!.getCameraState(); // get current cam state 
-    final nextZoom = (cameraState.zoom + 1).clamp(0.0, 22.0).toDouble(); // increase zoom by 1
-    // clamp is just to remain within mapbox limits. toDouble to remain type safety
-    await _map!.easeTo(CameraOptions(zoom: nextZoom,),
-    MapAnimationOptions(duration: 300, startDelay: 0,), // smoothly ease to new cam state with updated zoom,
-    // animating over 300 milli sec 
-    );
-  }
-
-  Future<void> _zoomOut() async{
-    if (_map == null) return; // prevent crash if map havent start
-    final cameraState = await _map!.getCameraState(); // get current cam state 
-    final nextZoom = (cameraState.zoom - 1).clamp(0.0, 22.0).toDouble(); // decrease zoom size by 1
-    // clamp is just to remain within mapbox limits. toDouble to remain type safety
-    await _map!.easeTo(CameraOptions(zoom: nextZoom,),
-    MapAnimationOptions(duration: 300, startDelay: 0,), // smoothly ease to new cam state with updated zoom,
-    // animating over 300 milli sec 
-    );
-  }
   
   // Location Helper Methods
   Future<void> _startLocationTracking() async {
