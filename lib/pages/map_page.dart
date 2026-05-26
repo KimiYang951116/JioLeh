@@ -119,8 +119,21 @@ class _MapPageState extends State<MapPage> {
   }
 
 
-  Future<void> _addPin() {
-    // TO-DO
+  Future<void> _addPin() async {
+    final position = _currentPosition;
+
+    if (position == null) return;
+    if (!mounted) return;
+
+    _locationPins.savePinnedLocation(
+      PinnedLocation(
+        name: "Pinned Location",
+        emoji: "📌",
+        latitude: position.latitude,
+        longitude: position.longitude,
+      ),
+    );
+    await _reloadPins();
   }
 
   Future<void> _renderPinnedLocations() async {
