@@ -50,6 +50,7 @@ class _MapPageState extends State<MapPage> {
   }
 
   @override
+  @override
   void dispose() {
     _location.dispose();
     super.dispose();
@@ -66,6 +67,8 @@ class _MapPageState extends State<MapPage> {
   Future<void> _enableMapboxLocationComponent() async {
     // Enables the built-in Mapbox location component
     // to show the user's current location on the map
+    // Enables the built-in Mapbox location component
+    // to show the user's current location on the map
     if (_map == null) return;
     await _map!.location.updateSettings(
       LocationComponentSettings(
@@ -76,6 +79,8 @@ class _MapPageState extends State<MapPage> {
       );
   }
 
+  Future<void> _moveCameraToPos(geo.Position position) async {
+    // Moves the map camera to the specified position with animation
   Future<void> _moveCameraToPos(geo.Position position) async {
     // Moves the map camera to the specified position with animation
     if (_map == null) return; 
@@ -98,6 +103,8 @@ class _MapPageState extends State<MapPage> {
   
   // Location Helper Methods
   Future<void> _startLocationTracking() async {
+    // Fetches the user's current location
+    // and starts real-time tracking of location updates
     // Fetches the user's current location
     // and starts real-time tracking of location updates
     final position = await _location.getCurrentLocation();
