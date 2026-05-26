@@ -133,9 +133,11 @@ class _MapPageState extends State<MapPage> {
         _isLoadingLocation = false;
         _currentLocationName = lastKnownPosition == null
           ? "Unable to fetch location"
-          : "Last known location";});
+          : "Fetching location...";}); 
+          //if no last known, show failure text. Otherwise, show temporary text
 
       if (lastKnownPosition != null) {
+        //reverse geocode if actly have coord
         await _updateLocationName(lastKnownPosition);
         await _moveCameraToPos(lastKnownPosition); // move camera there 
       }
@@ -162,12 +164,14 @@ class _MapPageState extends State<MapPage> {
 
   // Area Name Helper Methods
   Future<void> _updateLocationName(geo.Position position) async {
-    _geocoding.fetchAreaName(
+    final name = await _geocoding.fetchAreaName(
       latitude: position.latitude,
       longitude: position.longitude,
-    ).then((name) {
-      if (!mounted) return;
-      setState(() => _currentLocationName = name);
+    );
+
+    if (!mounted) return;
+    setState(() {
+       _currentLocationName = name;
     });
   }
 
