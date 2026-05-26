@@ -20,6 +20,7 @@ class MapPage extends StatefulWidget{
 class _MapPageState extends State<MapPage> {
   // Initialize services
   final auth = AuthServices();
+
   // The term late means the variable will be initialized later, but before it's used.
   // This allows us to use the auth instance to create the pinServices instance
   // without running into initialization order issues.
@@ -96,16 +97,41 @@ class _MapPageState extends State<MapPage> {
   }
 
   // Pin Helper Methods
-  Future<void> _reloadPins() {
-    // TO-DO
+  Future<void> _reloadPins() async {
+    final pins = await _locationPins.loadPinnedLocations();
+    if (!mounted) return;
+    setState(() => _pinnedLocations = pins);
+    await _renderPinnedLocations();
   }
+
 
   Future<void> _addPin() {
     // TO-DO
   }
 
-  Future<void> _renderPinnedLocations() {
-    // TO-DO
+  Future<void> _renderPinnedLocations() async {
+    if (_map == null) return;
+
+    _pinsManager ??=
+        await _map!.annotations.createCircleAnnotationManager();
+
+    await _pinsManager!.deleteAll();
+
+    for (final location in _pinnedLocations) {
+      await _pinsManager!.create(
+        CircleAnnotationOptions(
+          geometry: Point(
+            coordinates: Position(
+              location.longitude,
+              location.latitude,
+            ),
+          ),
+          circleRadius: 9.0,
+          circleColor: Colors.red.toARGB32(),
+          circleStrokeColor: Colors.white.toARGB32(),
+        ),
+      );
+    }
   }
 
   @override
