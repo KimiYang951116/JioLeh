@@ -62,7 +62,6 @@ class _MapPageState extends State<MapPage> {
 
   Future<void> _booting() async {
     // Main boot sequence to initialize location, map, and pins
-    await auth.signInIfNeeded();
     await _reloadPins();
     await _startLocationTracking();
   }
