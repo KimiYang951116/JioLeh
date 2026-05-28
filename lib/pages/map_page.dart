@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart' as geo;
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
@@ -14,6 +17,7 @@ import 'package:jio_leh/widgets/location_permission_dialog.dart';
 import 'package:jio_leh/widgets/current_area_bar.dart';
 import 'package:jio_leh/widgets/toolbar.dart';
 
+
 class MapPage extends StatefulWidget{
   const MapPage({super.key});
 
@@ -29,6 +33,8 @@ class _MapPageState extends State<MapPage> {
     _PinTypeOption(name: "Hotel", emoji: "🏨"),
     _PinTypeOption(name: "Toilet", emoji: "🚽"),
   ];
+
+  final Map<String, Uint8List> _emojiImageCache = {};
   // Initialize services
   final auth = AuthServices();
 
@@ -300,6 +306,52 @@ Future<String?> _showLocationCustomiseSheet(_PinTypeOption selectedType) async {
   );
 }
 
+Future<Uint8List> _emojiImageFor(String emoji) async {
+  final cachedImage = _emojiImageCache[emoji];
+
+  if (cachedImage != null) {
+    return cachedImage;
+  }
+
+  final recorder = ui.PictureRecorder();
+  final canvas = ui.Canvas(recorder);
+
+  const imageSize = 128.0;
+  const fontSize = 92.0;
+
+  final textPainter = TextPainter(
+    text: TextSpan(
+      text: emoji,
+      style: const TextStyle(fontSize: fontSize),
+    ),
+    textDirection: TextDirection.ltr,
+  );
+
+  textPainter.layout();
+
+  final offset = Offset(
+    (imageSize - textPainter.width) / 2,
+    (imageSize - textPainter.height) / 2,
+  );
+
+  textPainter.paint(canvas, offset);
+
+  final picture = recorder.endRecording();
+  final image = await picture.toImage(
+    imageSize.toInt(),
+    imageSize.toInt(),
+  );
+
+  final byteData = await image.toByteData(
+    format: ui.ImageByteFormat.png,
+  );
+
+  final emojiImage = byteData!.buffer.asUint8List();
+  _emojiImageCache[emoji] = emojiImage;
+
+  return emojiImage;
+}
+
 Future<void> _renderPinnedLocations() async {
   if (_map == null) return;
 
@@ -308,9 +360,8 @@ Future<void> _renderPinnedLocations() async {
   await _pinsManager!.deleteAll();
 
   for (final location in _pinnedLocations) {
-    final label = location.name.trim().isEmpty
-        ? location.emoji
-        : '${location.emoji} ${location.name}';
+    final emojiImage = await _emojiImageFor(location.emoji);
+    final name = location.name.trim();
 
     await _pinsManager!.create(
       PointAnnotationOptions(
@@ -320,8 +371,13 @@ Future<void> _renderPinnedLocations() async {
             location.latitude,
           ),
         ),
-        textField: label,
-        textSize: 18,
+        image: emojiImage,
+        iconSize: 0.55,
+        iconAnchor: IconAnchor.BOTTOM,
+        textField: name.isEmpty ? null : name,
+        textSize: 15,
+        textOffset: [0, 0.8],
+        textAnchor: TextAnchor.TOP,
         textColor: Colors.black.toARGB32(),
         textHaloColor: Colors.white.toARGB32(),
         textHaloWidth: 2,
