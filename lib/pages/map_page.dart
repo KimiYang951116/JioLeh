@@ -78,6 +78,24 @@ class _MapPageState extends State<MapPage> {
       );
   }
 
+  Future<void> _initMapStyleSettings() async {
+    if (_map == null) return;
+
+    _map!.scaleBar.updateSettings(
+      ScaleBarSettings(enabled: false),
+    );
+
+    // Position the compass above the recenter button 
+    // (which is at bottom left with some margin)
+    _map!.compass.updateSettings(
+      CompassSettings(
+        position: OrnamentPosition.BOTTOM_LEFT,
+        marginLeft: 10,
+        marginBottom: 90,
+      ),
+    );
+  }
+
   Future<void> _moveCameraToPos(geo.Position position) async{
     if (_map == null) return; // prevent crash if method called too early 
     await _map!.easeTo( // easeTo means the camera moves smoothly to current pos
@@ -220,9 +238,7 @@ class _MapPageState extends State<MapPage> {
             onMapCreated: (controller) async {
               _map = controller;
 
-              await _map!.scaleBar.updateSettings(
-                ScaleBarSettings(enabled: false),
-              );
+              await _initMapStyleSettings();
 
               await _enableMapboxLocationComponent();
               await _renderPinnedLocations();
