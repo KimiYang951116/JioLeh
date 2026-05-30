@@ -19,7 +19,11 @@ The app currently includes:
 - Current location detection and live location updates.
 - Reverse geocoding to show the user's current area.
 - Google sign-in through Supabase Auth.
-- Persistent pinned locations stored in Supabase.
+- An auth gate that routes users between sign-in, onboarding, and the map.
+- First-time onboarding to set up a user profile (username, display name,
+  birthday).
+- A profile page showing the signed-in user's details.
+- Persistent pinned locations and user profiles stored in Supabase.
 - A simple map toolbar for recentering and adding pins.
 
 ## Product Direction
@@ -136,10 +140,10 @@ Build commands may also need the same `--dart-define` values used by
 | Path | Purpose |
 |---|---|
 | `lib/main.dart` | App bootstrap and service initialization |
-| `lib/app.dart` | Root Flutter app |
-| `lib/pages/` | App pages |
+| `lib/app.dart` | Root Flutter app and auth gate routing |
+| `lib/pages/` | App pages (auth, onboarding, map, profile) |
 | `lib/widgets/` | Reusable UI widgets |
-| `lib/services/` | Auth, location, geocoding, and pin services |
+| `lib/services/` | Auth, account, location, geocoding, and pin services |
 | `lib/config/` | Mapbox and Supabase environment config |
 | `lib/models/` | App data models |
 | `test/` | Flutter tests |
