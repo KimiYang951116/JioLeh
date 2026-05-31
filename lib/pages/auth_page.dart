@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:jio_leh/services/auth_services.dart';
+import 'package:jio_leh/services/auth_service.dart';
 
 class AuthPage extends StatefulWidget {
   const AuthPage({super.key});
@@ -10,7 +10,7 @@ class AuthPage extends StatefulWidget {
 }
 
 class _AuthPageState extends State<AuthPage> {
-  final _auth = AuthServices();
+  final _auth = AuthService();
 
   bool _isSigningIn = false;
 
