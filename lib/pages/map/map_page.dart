@@ -12,9 +12,9 @@ import 'package:jio_leh/services/geocoding_services.dart';
 import 'package:jio_leh/services/location_services.dart';
 import 'package:jio_leh/services/pin_services.dart';
 
-import 'package:jio_leh/widgets/location_permission_dialog.dart';
-import 'package:jio_leh/widgets/current_area_bar.dart';
-import 'package:jio_leh/widgets/toolbar.dart';
+import 'package:jio_leh/pages/map/widgets/location_permission_dialog.dart';
+import 'package:jio_leh/pages/map/widgets/current_area_bar.dart';
+import 'package:jio_leh/pages/map/widgets/toolbar.dart';
 
 import 'package:jio_leh/pages/profile_page.dart';
 
