@@ -6,12 +6,9 @@ import 'package:geolocator/geolocator.dart' as geo;
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 
 import 'package:jio_leh/config/map_env.dart';
-import 'package:jio_leh/models/pinned_location.dart';
 
-// import 'package:jio_leh/services/auth_service.dart';
-// import 'package:jio_leh/services/geocoding_service.dart';
-// import 'package:jio_leh/services/location_service.dart';
-// import 'package:jio_leh/services/pin_service.dart';
+import 'package:jio_leh/models/pinned_location.dart';
+import 'package:jio_leh/pages/map/models/pin_type.dart';
 
 import 'package:jio_leh/pages/map/widgets/location_permission_dialog.dart';
 import 'package:jio_leh/pages/map/widgets/current_area_bar.dart';
@@ -29,13 +26,6 @@ class MapPage extends StatefulWidget{
 }
 
 class _MapPageState extends State<MapPage> {
-
-  static const _pinTypeOptions = [
-    _PinTypeOption(name: "Restaurant", emoji: "🍽️"),
-    _PinTypeOption(name: "Gym", emoji: "🏋"),
-    _PinTypeOption(name: "Hotel", emoji: "🏨"),
-    _PinTypeOption(name: "Toilet", emoji: "🚽"),
-  ];
 
   // stores already created emoji images so app dont redraw the same emoji agn and agn
   final Map<String, Uint8List> _emojiImageCache = {};
@@ -221,9 +211,9 @@ class _MapPageState extends State<MapPage> {
   }
   
   // this is AI-generated UI when user first click add location and choose frm the types 
-  Future<_PinTypeOption?> _showPinTypePicker() { // ? means may return null, or the selected option
-  return showModalBottomSheet<_PinTypeOption>(  // shows bottom sheet,
-  // _PinTypeOption mean can only return 1 pin type 
+  Future<PinType?> _showPinTypePicker() { // ? means may return null, or the selected option
+  return showModalBottomSheet<PinType>(  // shows bottom sheet,
+  // PinType mean can only return 1 pin type 
     context: context,
     showDragHandle: true, // drag handle on top of sheet 
     builder: (context) {
@@ -250,12 +240,12 @@ class _MapPageState extends State<MapPage> {
                     crossAxisSpacing: 12,
                     childAspectRatio: 2.4,
                     children: [
-                      for (final option in _pinTypeOptions) 
+                      for (final option in PinType.values) 
                       // loops through restaurant, ...
                         FilledButton( // one button per option 
                           onPressed: () => Navigator.pop(context, option),
                           child: Text(
-                            '${option.emoji} ${option.name}',
+                            '${option.emoji} ${option.label}',
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -272,7 +262,7 @@ class _MapPageState extends State<MapPage> {
 }
 
 // this is AI-generated UI when user chose loc type and now customising name 
-Future<String?> _showLocationCustomiseSheet(_PinTypeOption selectedType) async {
+Future<String?> _showLocationCustomiseSheet(PinType selectedType) async {
   final controller = TextEditingController();
 
   return showModalBottomSheet<String>(
@@ -535,16 +525,4 @@ bool _isNearbyLocation(
       ),
     );
   }
-}
-
-// each location type e.g. gym will store its corresponding set emoji 
-//and the customised name from user 
-class _PinTypeOption {
-  final String emoji;
-  final String name;
-
-  const _PinTypeOption({
-    required this.name,
-    required this.emoji,
-  });
 }
