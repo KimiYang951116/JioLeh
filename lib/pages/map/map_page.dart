@@ -1,6 +1,3 @@
-import 'dart:typed_data';
-import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart' as geo;
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
@@ -15,6 +12,8 @@ import 'package:jio_leh/pages/map/widgets/current_area_bar.dart';
 import 'package:jio_leh/pages/map/widgets/map_toolbar.dart';
 import 'package:jio_leh/pages/map/widgets/location_customize_sheet.dart';
 
+import 'package:jio_leh/pages/map/renders/map_pins.dart';
+
 import 'package:jio_leh/pages/profile_page.dart';
 
 import 'package:jio_leh/services/services.dart';
@@ -28,7 +27,6 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   // stores already created emoji images so app dont redraw the same emoji agn and agn
-  final Map<String, Uint8List> _emojiImageCache = {};
 
   // Services are resolved from the shared composition root (Services) so the
   // whole app uses a single AuthService — and therefore a single Supabase
@@ -40,7 +38,7 @@ class _MapPageState extends State<MapPage> {
 
   // Map state and controls
   MapboxMap? _map;
-  PointAnnotationManager? _pinsManager;
+  MapPins? _pins; 
   ViewportState? _initialViewport;
 
   // User location state and controls
@@ -74,8 +72,9 @@ class _MapPageState extends State<MapPage> {
 
   // Map Helper Methods
   Future<void> _enableMapboxLocationComponent() async {
-    if (_map == null)
+    if (_map == null) {
       return; // _map only assigned aft onMapCreated runs. this prevent crash
+    }
     await _map!.location.updateSettings(
       // access and update location component settings
       LocationComponentSettings(
@@ -193,7 +192,7 @@ class _MapPageState extends State<MapPage> {
     final pins = await _locationServicePins.loadPinnedLocations();
     if (!mounted) return;
     setState(() => _pinnedLocations = pins);
-    await _renderPinnedLocations();
+    await _pins?.render(_pinnedLocations);
   }
 
   Future<void> _addPin() async {
@@ -281,118 +280,6 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
-  Future<Uint8List> _emojiImageFor(String emoji) async {
-    final cachedImage = _emojiImageCache[emoji];
-
-    if (cachedImage != null) {
-      return cachedImage;
-    }
-
-    final recorder = ui.PictureRecorder();
-    final canvas = ui.Canvas(recorder);
-
-    // emoji size. change fontSize to make bigger/smaller
-    const imageSize = 128.0;
-    const fontSize = 92.0;
-
-    // draw the emoji like a text
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: emoji,
-        style: const TextStyle(fontSize: fontSize),
-      ),
-      textDirection: TextDirection.ltr,
-    );
-
-    textPainter.layout();
-
-    final offset = Offset(
-      (imageSize - textPainter.width) / 2,
-      (imageSize - textPainter.height) / 2,
-    );
-
-    // paints emoji onto invisible canvas
-    textPainter.paint(canvas, offset);
-
-    final picture = recorder.endRecording();
-    final image = await picture.toImage(
-      // the canvas turn into an image
-      imageSize.toInt(),
-      imageSize.toInt(),
-    );
-
-    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-
-    final emojiImage = byteData!.buffer.asUint8List();
-    // converts image into the format Mapbox needs
-    _emojiImageCache[emoji] = emojiImage;
-
-    return emojiImage;
-  }
-
-  // draws the newest pin first from supabase, skips overlapping ones
-  Future<void> _renderPinnedLocations() async {
-    if (_map == null) return;
-
-    _pinsManager ??= await _map!.annotations.createPointAnnotationManager();
-
-    await _pinsManager!.deleteAll();
-
-    final renderedLocations =
-        <PinnedLocation>[]; // keeps track of pins alr shown on map
-
-    for (final location in _pinnedLocations) {
-      final alreadyRenderedNearby = renderedLocations.any(
-        // checks if this pin is close to another pin already drawn
-        (renderedLocation) => _isNearbyLocation(location, renderedLocation),
-      );
-
-      if (alreadyRenderedNearby) continue;
-      // if pins are nearby, skip pinning so no overlapping of names
-
-      renderedLocations.add(location);
-      // else, rmb it and draw it
-
-      final emojiImage = await _emojiImageFor(location.emoji);
-      final name = location.name.trim();
-
-      await _pinsManager!.create(
-        PointAnnotationOptions(
-          geometry: Point(
-            coordinates: Position(location.longitude, location.latitude),
-          ),
-          image: emojiImage,
-          iconSize: 0.55,
-          iconAnchor: IconAnchor.BOTTOM,
-          textField: name.isEmpty ? null : name,
-          textSize: 15,
-          textOffset: [0, 0.8],
-          textAnchor: TextAnchor.TOP,
-          textColor: Colors.black.toARGB32(),
-          textHaloColor: Colors.white.toARGB32(),
-          textHaloWidth: 2,
-        ),
-      );
-    }
-  }
-
-  // takes in 2 location. if the diff in longitude and latitude less than 20m, it is
-  // same place. This is a helper method for renderPinnedLocation()
-  bool _isNearbyLocation(
-    PinnedLocation firstLocation,
-    PinnedLocation secondLocation,
-  ) {
-    const tolerance = 0.0002; // loc within 20m is the "same" place
-
-    final latitudeDifference =
-        (firstLocation.latitude - secondLocation.latitude).abs();
-
-    final longitudeDifference =
-        (firstLocation.longitude - secondLocation.longitude).abs();
-
-    return latitudeDifference < tolerance && longitudeDifference < tolerance;
-  }
-
   @override
   Widget build(BuildContext context) {
     if (_isLoadingLocation) {
@@ -407,11 +294,11 @@ class _MapPageState extends State<MapPage> {
             styleUri: MapEnv.mapboxStyleUri,
             onMapCreated: (controller) async {
               _map = controller;
+              _pins = MapPins(controller);  
 
               await _initMapStyleSettings();
-
               await _enableMapboxLocationComponent();
-              await _renderPinnedLocations();
+              await _pins!.render(_pinnedLocations);
 
               if (_currentPosition != null) {
                 await _moveCameraToPos(_currentPosition!);
