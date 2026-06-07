@@ -46,20 +46,134 @@ class FriendsService {
         .eq('addressee_id', userId);
     
     for (final row in sentFriends) {
-      friends.add(UserFriend(
-        userProfile: UserProfile.fromMap(row['profiles']),
-        status: FriendshipStatus.values.byName(row['status'])
-      ));
+      friends.add(UserFriend.fromMap(row, FriendDirection.outgoing));
     }
 
     for (final row in receivedFriends) {
-      friends.add(UserFriend(
-        userProfile: UserProfile.fromMap(row['profiles']),
-        status: FriendshipStatus.values.byName(row['status'])
-      ));
+      friends.add(UserFriend.fromMap(row, FriendDirection.incoming));
     }
 
     return friends;
   }
+  
+  /// Sends a friend request from the current user to the specified [toUser].
+  /// 
+  /// Returns a Future that completes when the friend request is successfully sent.
+  /// 
+  /// Throws a [FriendAlreadyExists] exception if a friend request already exists between the users
+  Future<void> sendFriendRequest(UserProfile toUser) async {
+    final userId = auth.getCurrentUserId();
+    try {
+      await _supabase.from(_tableName).insert({
+        'requester_id': userId,
+        'addressee_id': toUser.id,
+        'status': FriendshipStatus.pending.name,
+      });
+    } on PostgrestException catch (e) {
+      // PostgrestException with code '23505' indicates a unique constraint violation
+      // https://www.postgresql.org/docs/current/errcodes-appendix.html for more details
+      if (e.code == '23505') {
+        throw const FriendAlreadyExists();
+      }
+      // For any other PostgrestException, we rethrow it to be handled by the caller.
+      rethrow;
+    }
+  }
 
+  /// Accepts a pending friend request from the specified [fromUser].
+  /// 
+  /// Returns a Future that completes when the friend request is successfully accepted.
+  /// 
+  /// Throws a [FriendsRequestNotFound] exception if there is no pending friend request from the specified user.
+  Future<void> acceptFriendRequest(UserProfile fromUser) async {
+    final userId = auth.getCurrentUserId();
+    final updated = await _supabase
+      .from(_tableName)
+      .update({'status': FriendshipStatus.accepted.name,})
+      .eq('requester_id', fromUser.id)
+      .eq('addressee_id', userId)
+      .eq('status', FriendshipStatus.pending.name)
+      .select();
+    
+    if (updated.isEmpty) {
+      throw const FriendsRequestNotFound();
+    }
+  }
+
+  /// Rejects a pending friend request from the specified [fromUser].
+  /// 
+  /// Returns a Future that completes when the friend request is successfully rejected.
+  /// 
+  /// Throws a [FriendsRequestNotFound] exception if there is no pending friend request from the specified user.
+  Future<void> rejectFriendRequest(UserProfile fromUser) async {
+    final userId = auth.getCurrentUserId();
+    final deleted = await _supabase
+      .from(_tableName)
+      .delete()
+      .eq('requester_id', fromUser.id)
+      .eq('addressee_id', userId)
+      .eq('status', FriendshipStatus.pending.name)
+      .select();
+    
+    if (deleted.isEmpty) {
+      throw const FriendsRequestNotFound();
+    }
+  }
+
+  /// Removes an existing friend relationship with the specified [friend].
+  /// 
+  /// Returns a Future that completes when the friend relationship is successfully removed.
+  /// 
+  /// Throws a [FriendNotFound] exception if there is no existing friendship with the specified user.
+  Future<void> removeFriend(UserProfile friend) async {
+    final userId = auth.getCurrentUserId();
+
+    // Case: current user sent the original request
+    final orgSent = await _supabase
+        .from(_tableName)
+        .delete()
+        .eq('status', FriendshipStatus.accepted.name)
+        .eq('requester_id', userId)
+        .eq('addressee_id', friend.id)
+        .select();
+
+    // Case: the friend sent the original request
+    final orgReceived = await _supabase
+        .from(_tableName)
+        .delete()
+        .eq('status', FriendshipStatus.accepted.name)
+        .eq('requester_id', friend.id)
+        .eq('addressee_id', userId)
+        .select();
+    
+    if (orgSent.isEmpty && orgReceived.isEmpty) {
+      throw const FriendNotFound();
+    }
+  }
+}
+
+/// Base class for all friends-related exceptions
+class FriendsException implements Exception {
+  final String message;
+  const FriendsException(this.message);
+  @override
+  String toString() => message;
+}
+
+/// Exception thrown when a friend request already exists between the users.
+class FriendAlreadyExists extends FriendsException {
+  const FriendAlreadyExists()
+    : super('Friend request already exists.');
+}
+
+/// Exception thrown when a friend request is not found.
+class FriendsRequestNotFound extends FriendsException {
+  const FriendsRequestNotFound()
+    : super('No pending friend request from this user.');
+}
+
+/// Exception thrown when attempting to fetch a friend that does not exist.
+class FriendNotFound extends FriendsException {
+  const FriendNotFound()
+    : super('No existing friendship with this user.');
 }
