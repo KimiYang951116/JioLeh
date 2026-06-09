@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:jio_leh/services/services.dart';
 import 'package:jio_leh/theme.dart';
 
+import 'onboarding_widgets.dart';
+
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key, this.onComplete});
 
@@ -113,34 +115,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
-              SizedBox(
-                width: double.infinity,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(30, 30, 30, 30),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("👋", style: TextStyle(fontSize: 40)),
-                      SizedBox(height: 8),
-                      Text(
-                        "Welcome! Let's set you up",
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      Text(
-                        "This is how friends will see in your profile.",
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: AppColors.onboardingSubtitle,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              WelcomeHeader(),
               SizedBox(
                 width: double.infinity,
                 child: CircleAvatar(
@@ -148,214 +123,15 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   backgroundColor: AppColors.darkWidgetBackground,
                 ),
               ),
-              SizedBox(
-                width: double.infinity,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(30, 30, 30, 30),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "USER ID · NOT AVAILABLE",
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: AppColors.onboardingSubtitle,
-                          fontWeight: FontWeight.bold
-                        ),
-                      ),
-                      SizedBox(height: 10,),
-                      Container(
-                        width: 350,
-                        height: 55,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(18),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0x0F1E1B16),
-                              blurRadius: 24,
-                              offset: Offset(0, 8),
-                            ),
-                          ]
-                        ),
-                        child: TextField(
-                          decoration: InputDecoration(
-                            hintText: "Pls don't enter anything yet",
-                            hintStyle: TextStyle(
-                              fontSize: 18,
-                              color: Colors.grey,
-                              fontWeight: FontWeight.bold
-                            ),
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 15),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 30),
-                      Text(
-                        "YOUR NAME",
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: AppColors.onboardingSubtitle,
-                          fontWeight: FontWeight.bold
-                        ),
-                      ),
-                      SizedBox(height: 10,),
-                      Container(
-                        width: 350,
-                        height: 55,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(18),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0x0F1E1B16),
-                              blurRadius: 24,
-                              offset: Offset(0, 8),
-                            ),
-                          ]
-                        ),
-                        child: TextField(
-                          controller: _displayNameController,
-                          decoration: InputDecoration(
-                            hintText: "What should we call you?",
-                            hintStyle: TextStyle(
-                              fontSize: 18,
-                              color: Colors.grey,
-                              fontWeight: FontWeight.bold
-                            ),
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 15),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 30),
-                      Text(
-                        "BIRTHDAY · OPTIONAL",
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: AppColors.onboardingSubtitle,
-                          fontWeight: FontWeight.bold
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Container(
-                            width: 70,
-                            height: 55,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(18),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Color(0x0F1E1B16),
-                                  blurRadius: 24,
-                                  offset: Offset(0, 8),
-                                ),
-                              ]
-                            ),
-                            child: TextField(
-                              controller: _dayController,
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                hintText: "DD",
-                                hintStyle: TextStyle(
-                                  fontSize: 18,
-                                  color: Colors.grey,
-                                  fontWeight: FontWeight.bold
-                                ),
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 15),
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 10),
-                          Container(
-                            width: 150,
-                            height: 55,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(18),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Color(0x0F1E1B16),
-                                  blurRadius: 24,
-                                  offset: Offset(0, 8),
-                                ),
-                              ]
-                            ),
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 16),
-                              child: DropdownButton<String>(
-                                value: _selectedMonth,
-                                hint: Text(
-                                  "Month",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: Colors.grey,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                isExpanded: true,
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold
-                                ),
-                                dropdownColor: AppColors.lightBackground,
-                                borderRadius: BorderRadius.circular(18),
-                                items: _months.map((String month) {
-                                  return DropdownMenuItem<String>(
-                                    value: month,
-                                    child: Text(month),
-                                  );
-                                }).toList(),
-                                onChanged: (String? newValue) {
-                                  setState(() {
-                                    _selectedMonth = newValue;
-                                  });
-                                },
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 10),
-                          Container(
-                            width: 100,
-                            height: 55,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(18),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Color(0x0F1E1B16),
-                                  blurRadius: 24,
-                                  offset: Offset(0, 8),
-                                ),
-                              ]
-                            ),
-                            child: TextField(
-                              controller: _yearController,
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                hintText: "YYYY",
-                                hintStyle: TextStyle(
-                                  fontSize: 18,
-                                  color: Colors.grey,
-                                  fontWeight: FontWeight.bold
-                                ),
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 15),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      
-                    ],
-                  ),
-                )
+              ProfileForm(
+                displayNameController: _displayNameController,
+                dayController: _dayController,
+                yearController: _yearController,
+                selectedMonth: _selectedMonth,
+                months: _months,
+                onMonthChanged: (value) => setState(() => _selectedMonth = value),
               ),
+
               Spacer(),
               Padding(
                 padding: const EdgeInsets.fromLTRB(30, 0, 30, 20),
