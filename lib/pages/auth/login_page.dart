@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:jio_leh/services/services.dart';
 
-import 'widgets/brand_lockup.dart';
-import 'widgets/signin_panel.dart';
+import 'login_widgets.dart';
 
 import 'package:jio_leh/theme.dart';
 
