@@ -58,7 +58,7 @@ class SignInPanel extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(18, 25, 18, 20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.12),
@@ -70,13 +70,17 @@ class SignInPanel extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            "Sign in to explore your friends' favourite spots",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: const Color(0xFF7A736A),
-              fontSize: headingSize,
-              fontWeight: FontWeight.w600,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              "Sign in to explore your friends' favourite spots",
+              maxLines: 1,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: const Color(0xFF7A736A),
+                fontSize: headingSize,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           const SizedBox(height: 16),
