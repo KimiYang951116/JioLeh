@@ -150,7 +150,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         SizedBox(
                           width: double.infinity,
                           child: CircleAvatar(
-                            radius: 60,
+                            radius: 50,
                             backgroundColor: AppColors.darkWidgetBackground,
                           ),
                         ),
