@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:jio_leh/models/user_profile.dart';
+import 'package:jio_leh/pages/profile_edit_page.dart';
 
 import 'package:jio_leh/services/services.dart';
 
@@ -30,6 +31,22 @@ class _ProfilePageState extends State<ProfilePage> {
     setState(() => _profile = profile);
   }
 
+  Future<void> _editProfile() async {
+    final profile = _profile;
+    if (profile == null) return;
+
+    final updatedProfile = await Navigator.push<UserProfile>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ProfileEditPage(profile: profile),
+      ),
+    );
+
+    if (updatedProfile != null && mounted) {
+      setState(() => _profile = updatedProfile);
+    }
+  }
+
   static const _monthNames = [
     'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
@@ -42,6 +59,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final titleSize = context.scaledFont(AppTextSizes.heading);
+    final nameSize = context.scaledFont(AppTextSizes.button);
+    final labelSize = context.scaledFont(AppTextSizes.label);
+
     return Scaffold(
       backgroundColor: AppColors.lightBackground,
       body: SafeArea(
@@ -57,8 +78,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       Text(
                         "Profile",
                         style: TextStyle(
-                          fontSize: AppTextSizes.heading+2,
-                          fontWeight: FontWeight(1000),
+                          fontSize: titleSize + 2,
+                          fontWeight: FontWeight.w900,
                         ),
                       ),
                       SizedBox(width: 100),
@@ -97,7 +118,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                           Text(
                                             _profile?.displayName ?? "",
                                             style: TextStyle(
-                                              fontSize: AppTextSizes.button,
+                                              fontSize: nameSize,
                                               fontWeight: FontWeight.w900
                                             ),
                                           ),
@@ -116,7 +137,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                         _profile?.bio ??
                                             "New here and keen to meet some kakis. Always down for makan or a casual hang. Jio me la 🙂",
                                         style: TextStyle(
-                                          fontSize: AppTextSizes.label
+                                          fontSize: labelSize
                                         ),
                                       ),
                                       SizedBox(height: 15,),
@@ -144,7 +165,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                             borderRadius: BorderRadius.circular(16),
                                           ),
                                         ),
-                                        onPressed: null,
+                                        onPressed: _profile == null
+                                            ? null
+                                            : _editProfile,
                                         child: Row(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
@@ -158,7 +181,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                                 "Edit Profile",
                                                 overflow: TextOverflow.ellipsis,
                                                 style: TextStyle(
-                                                  fontSize: AppTextSizes.label,
+                                                  fontSize: labelSize,
                                                   fontWeight: FontWeight.bold,
                                                   color: Colors.white
                                                 ),
@@ -168,7 +191,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                         ),
                                       ),
                                     ),
-                                    SizedBox(width: 30),
+                                    SizedBox(width: 20),
                                     Expanded(
                                       child: FilledButton(
                                         style: FilledButton.styleFrom(
@@ -194,7 +217,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                                 "Share Code",
                                                 overflow: TextOverflow.ellipsis,
                                                 style: TextStyle(
-                                                  fontSize: AppTextSizes.label,
+                                                  fontSize: labelSize,
                                                   fontWeight: FontWeight.bold,
                                                   color: Colors.white
                                                 ),
