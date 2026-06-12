@@ -14,7 +14,7 @@ class WelcomeHeader extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: Padding(
-        padding: EdgeInsets.fromLTRB(30, 30, 30, 30),
+        padding: EdgeInsets.fromLTRB(30, 30, 30, 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -33,11 +33,16 @@ class WelcomeHeader extends StatelessWidget {
               ),
             ),
             SizedBox(height: 10),
-            Text(
-              "This is how friends will see in your profile.",
-              style: TextStyle(
-                fontSize: subtitleSize,
-                color: AppColors.onboardingSubtitle,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "This is how friends will see in your profile.",
+                maxLines: 1,
+                style: TextStyle(
+                  fontSize: subtitleSize,
+                  color: AppColors.onboardingSubtitle,
+                ),
               ),
             ),
           ],
@@ -78,7 +83,7 @@ class ProfileForm extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: Padding(
-        padding: EdgeInsets.fromLTRB(30, 30, 30, 30),
+        padding: EdgeInsets.fromLTRB(30, 20, 30, 30),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

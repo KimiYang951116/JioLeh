@@ -29,7 +29,7 @@ class AppTextSizes {
   static const heading = 26.0;
   static const subtitle = 18.0;
   static const body = 16.0;
-  static const label = 14.0;
+  static const label = 13.0;
   static const button = 17.0;
   static const caption = 12.0;
 }
