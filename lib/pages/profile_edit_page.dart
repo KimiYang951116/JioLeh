@@ -71,7 +71,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                   const SizedBox(height: 10),
                   SizedBox(
                     width: double.infinity,
-                    height: 200,
+                    height: 150,
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         color: const Color.fromARGB(255, 255, 255, 255),
@@ -315,7 +315,50 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                       ),
                     ],
                   ),
-                  const Spacer(),
+                  const SizedBox(height: 20),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF9E2F24),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0xFF9E2F24),
+                            blurRadius: 0,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: SizedBox(
+                        height: 46,
+                        child: FilledButton(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: const Color(0xFFD84B3A),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            elevation: 0,
+                            textStyle: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          onPressed: () {},
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.delete, size: 18),
+                              SizedBox(width: 8),
+                              Text('Delete account'),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Spacer(),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                     child: DecoratedBox(
