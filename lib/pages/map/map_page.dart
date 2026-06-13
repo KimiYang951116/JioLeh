@@ -28,7 +28,6 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-
   // Services are resolved from the shared composition root (Services) so the
   // whole app uses a single AuthService — and therefore a single Supabase
   // client — instead of each page constructing its own.
@@ -39,7 +38,7 @@ class _MapPageState extends State<MapPage> {
 
   // Map state and controls
   MapboxMap? _map;
-  MapPins? _pins; 
+  MapPins? _pins;
   ViewportState? _initialViewport;
 
   // User location state and controls
@@ -189,20 +188,36 @@ class _MapPageState extends State<MapPage> {
   }
 
   Future<void> _showPinnedLocation(PinnedLocation location) async {
-  final pinType = PinType.values.firstWhere(
-    (type) => type.emoji == location.emoji,
-    orElse: () => PinType.restaurant,
-  );
+    final pinType = PinType.values.firstWhere(
+      (type) => type.emoji == location.emoji,
+      orElse: () => PinType.restaurant,
+    );
 
-  await showLocationCustomizeSheet(
-    context,
-    pinType,
-    initialCustomization: LocationCustomization(
-      name: location.name,
-      rating: location.rating,
-      review: location.review ?? '',
-    ),
-    isReadOnly: true,);
+    try {
+      final photoUrls = await _locationServicePins.createPhotoUrls(
+        location.photoPaths,
+      );
+
+      if (!mounted) return;
+
+      await showLocationCustomizeSheet(
+        context,
+        pinType,
+        initialCustomization: LocationCustomization(
+          name: location.name,
+          rating: location.rating,
+          review: location.review ?? '',
+          photoUrls: photoUrls,
+        ),
+        isReadOnly: true,
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not load location photos: $error')),
+      );
+    }
   }
 
   // Pin Helper Methods
@@ -215,37 +230,38 @@ class _MapPageState extends State<MapPage> {
 
   Future<void> _addPin() async {
     // function runs when user press add pin button
-    final selectedType =
-        await showPinTypePicker(context); // page comes up, wait for user to tap
+    final selectedType = await showPinTypePicker(
+      context,
+    ); // page comes up, wait for user to tap
     if (selectedType == null) return; // if nvr choose, return nth
 
     if (!mounted) return; // stops if page not active
 
-    final customization = await showLocationCustomizeSheet(context, selectedType);
-
-    if (!mounted) return; // in case user left page while sheet open
-
-    if (customization == null) return;
-    
     final position = _currentPosition; // save current location for pinning
 
     if (position == null) return; // stops if location unknown
 
-    await _locationServicePins.savePinnedLocation(
-      PinnedLocation(
-        latitude: position.latitude,
-        longitude: position.longitude,
-        name: customization.name, // if user close page early, return ''
-        // else, return wtv he typed in
-        emoji: selectedType.emoji,
-        rating: customization.rating,
-        review: customization.review,
-      ),
-    ); // still save the emoji
+    await showLocationCustomizeSheet(
+      context,
+      selectedType,
+      onSave: (customization) async {
+        await _locationServicePins.savePinnedLocation(
+          PinnedLocation(
+            latitude: position.latitude,
+            longitude: position.longitude,
+            name: customization.name, // if user close page early, return ''
+            // else, return wtv he typed in
+            emoji: selectedType.emoji,
+            rating: customization.rating,
+            review: customization.review,
+          ),
+          customization.selectedPhotos,
+        ); // still save the emoji
 
-    await _reloadPins();
+        await _reloadPins();
+      },
+    );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -261,11 +277,12 @@ class _MapPageState extends State<MapPage> {
             styleUri: MapEnv.mapboxStyleUri,
             onMapCreated: (controller) async {
               _map = controller;
-              _pins = MapPins(controller,
-              onPinTapped: (location) {
-                _showPinnedLocation(location);
-              },
-              );  
+              _pins = MapPins(
+                controller,
+                onPinTapped: (location) {
+                  _showPinnedLocation(location);
+                },
+              );
 
               await _initMapStyleSettings();
               await _enableMapboxLocationComponent();

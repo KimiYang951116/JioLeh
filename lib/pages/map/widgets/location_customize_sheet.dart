@@ -23,11 +23,10 @@ class LocationCustomization {
 Future<LocationCustomization?> showLocationCustomizeSheet(
   BuildContext context,
   PinType selectedType, {
-    LocationCustomization? initialCustomization,
-    bool isReadOnly = false,
-    Future<void> Function(LocationCustomization customization)? onSave,
-  }
-) async {
+  LocationCustomization? initialCustomization,
+  bool isReadOnly = false,
+  Future<void> Function(LocationCustomization customization)? onSave,
+}) async {
   final nameController = TextEditingController(
     text: initialCustomization?.name ?? '',
   );
@@ -94,9 +93,9 @@ Future<LocationCustomization?> showLocationCustomizeSheet(
     } catch (error) {
       if (!sheetContext.mounted) return;
 
-      ScaffoldMessenger.of(sheetContext).showSnackBar(
-        SnackBar(content: Text('Could not select photo: $error')),
-      );
+      ScaffoldMessenger.of(
+        sheetContext,
+      ).showSnackBar(SnackBar(content: Text('Could not select photo: $error')));
     }
   }
 
@@ -163,16 +162,14 @@ Future<LocationCustomization?> showLocationCustomizeSheet(
                           for (var star = 1; star <= 5; star++)
                             IconButton(
                               onPressed: isReadOnly
-                              ? null
-                              : () {
-                                setModalState(() {
-                                  rating = star;
-                                });
-                              },
+                                  ? null
+                                  : () {
+                                      setModalState(() {
+                                        rating = star;
+                                      });
+                                    },
                               icon: Icon(
-                                star <= rating
-                                    ? Icons.star
-                                    : Icons.star_border,
+                                star <= rating ? Icons.star : Icons.star_border,
                                 color: Colors.amber,
                                 size: 36,
                               ),
@@ -230,7 +227,7 @@ Future<LocationCustomization?> showLocationCustomizeSheet(
                                   width: 100,
                                   height: 100,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) {
+                                  errorBuilder: (context, error, stackTrace) {
                                     return const SizedBox(
                                       width: 100,
                                       height: 100,
@@ -295,9 +292,7 @@ Future<LocationCustomization?> showLocationCustomizeSheet(
                                                     setModalState,
                                                   );
                                                 },
-                                          child: const Icon(
-                                            Icons.add_a_photo,
-                                          ),
+                                          child: const Icon(Icons.add_a_photo),
                                         ),
                                 ),
                               ),
@@ -321,15 +316,13 @@ Future<LocationCustomization?> showLocationCustomizeSheet(
                                   name: nameController.text.trim(),
                                   review: reviewController.text.trim(),
                                   rating: rating,
-                                  selectedPhotos:
-                                      List.unmodifiable(selectedPhotos),
+                                  selectedPhotos: List.unmodifiable(
+                                    selectedPhotos,
+                                  ),
                                 );
 
                                 if (onSave == null) {
-                                  Navigator.pop(
-                                    sheetContext,
-                                    customization,
-                                  );
+                                  Navigator.pop(sheetContext, customization);
                                   return;
                                 }
 
@@ -342,10 +335,7 @@ Future<LocationCustomization?> showLocationCustomizeSheet(
 
                                   if (!sheetContext.mounted) return;
 
-                                  Navigator.pop(
-                                    sheetContext,
-                                    customization,
-                                  );
+                                  Navigator.pop(sheetContext, customization);
                                 } catch (error) {
                                   if (!sheetContext.mounted) return;
 
@@ -353,8 +343,9 @@ Future<LocationCustomization?> showLocationCustomizeSheet(
                                     isSaving = false;
                                   });
 
-                                  ScaffoldMessenger.of(sheetContext)
-                                      .showSnackBar(
+                                  ScaffoldMessenger.of(
+                                    sheetContext,
+                                  ).showSnackBar(
                                     SnackBar(
                                       content: Text(
                                         'Could not save location: $error',
