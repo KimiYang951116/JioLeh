@@ -18,6 +18,7 @@ import 'package:jio_leh/pages/profile_page.dart';
 import 'package:jio_leh/pages/friends_page.dart';
 
 import 'package:jio_leh/services/services.dart';
+import 'package:jio_leh/pages/map/models/pin_type.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -187,6 +188,23 @@ class _MapPageState extends State<MapPage> {
         });
   }
 
+  Future<void> _showPinnedLocation(PinnedLocation location) async {
+  final pinType = PinType.values.firstWhere(
+    (type) => type.emoji == location.emoji,
+    orElse: () => PinType.restaurant,
+  );
+
+  await showLocationCustomizeSheet(
+    context,
+    pinType,
+    initialCustomization: LocationCustomization(
+      name: location.name,
+      rating: location.rating,
+      review: location.review ?? '',
+    ),
+    isReadOnly: true,);
+  }
+
   // Pin Helper Methods
   Future<void> _reloadPins() async {
     final pins = await _locationServicePins.loadPinnedLocations();
@@ -243,7 +261,11 @@ class _MapPageState extends State<MapPage> {
             styleUri: MapEnv.mapboxStyleUri,
             onMapCreated: (controller) async {
               _map = controller;
-              _pins = MapPins(controller);  
+              _pins = MapPins(controller,
+              onPinTapped: (location) {
+                _showPinnedLocation(location);
+              },
+              );  
 
               await _initMapStyleSettings();
               await _enableMapboxLocationComponent();
