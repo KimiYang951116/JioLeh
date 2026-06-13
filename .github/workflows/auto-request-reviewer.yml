@@ -1,0 +1,34 @@
+name: Auto Request Reviewer
+
+on:
+  pull_request_target:
+    branches:
+      - main
+    types:
+      - opened
+      - reopened
+      - ready_for_review
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  request-reviewer:
+    name: Request paired reviewer
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Request reviewer based on PR author
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: |
+          gh pr edit "$PR_NUMBER" --add-assignee "$AUTHOR"
+
+          if [ "$AUTHOR" = "KimiYang951116" ]; then
+            gh pr edit "$PR_NUMBER" --add-reviewer "justhehippo"
+          elif [ "$AUTHOR" = "justhehippo" ]; then
+            gh pr edit "$PR_NUMBER" --add-reviewer "KimiYang951116"
+          fi
