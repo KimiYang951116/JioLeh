@@ -26,10 +26,19 @@ jobs:
           AUTHOR: ${{ github.event.pull_request.user.login }}
           REPO: ${{ github.repository }}
         run: |
-          gh pr edit "$PR_NUMBER" --repo "$REPO" --add-assignee "$AUTHOR"
+          gh api \
+            --method POST \
+            "repos/$REPO/issues/$PR_NUMBER/assignees" \
+            -f "assignees[]=$AUTHOR"
 
           if [ "$AUTHOR" = "KimiYang951116" ]; then
-            gh pr edit "$PR_NUMBER" --repo "$REPO" --add-reviewer "justhehippo"
+            gh api \
+              --method POST \
+              "repos/$REPO/pulls/$PR_NUMBER/requested_reviewers" \
+              -f "reviewers[]=justhehippo"
           elif [ "$AUTHOR" = "justhehippo" ]; then
-            gh pr edit "$PR_NUMBER" --repo "$REPO" --add-reviewer "KimiYang951116"
+            gh api \
+              --method POST \
+              "repos/$REPO/pulls/$PR_NUMBER/requested_reviewers" \
+              -f "reviewers[]=KimiYang951116"
           fi
