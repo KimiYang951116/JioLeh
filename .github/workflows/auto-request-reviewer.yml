@@ -24,11 +24,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           AUTHOR: ${{ github.event.pull_request.user.login }}
+          REPO: ${{ github.repository }}
         run: |
-          gh pr edit "$PR_NUMBER" --add-assignee "$AUTHOR"
+          gh pr edit "$PR_NUMBER" --repo "$REPO" --add-assignee "$AUTHOR"
 
           if [ "$AUTHOR" = "KimiYang951116" ]; then
-            gh pr edit "$PR_NUMBER" --add-reviewer "justhehippo"
+            gh pr edit "$PR_NUMBER" --repo "$REPO" --add-reviewer "justhehippo"
           elif [ "$AUTHOR" = "justhehippo" ]; then
-            gh pr edit "$PR_NUMBER" --add-reviewer "KimiYang951116"
+            gh pr edit "$PR_NUMBER" --repo "$REPO" --add-reviewer "KimiYang951116"
           fi
