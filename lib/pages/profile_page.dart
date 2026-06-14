@@ -6,9 +6,12 @@ import 'package:jio_leh/pages/profile_edit_page.dart';
 import 'package:jio_leh/services/services.dart';
 
 import "package:jio_leh/theme.dart";
+import 'package:jio_leh/pages/share_code_page.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+  final String? userId;
+
+  const ProfilePage({super.key, this.userId,});
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -26,8 +29,37 @@ class _ProfilePageState extends State<ProfilePage> {
     _loadProfile();
   }
 
+  // Whether the loaded profile belongs to the current user. If no profile is
+  // loaded yet, returns false.
+  bool get _isOwnProfile {
+    final profile = _profile;
+    if (profile == null) return false;
+
+    return profile.id == Services.auth.getCurrentUserId();
+  }
+
+  // Loads the profile from the database and updates the state. If the profile
+  // fails to load (e.g. due to network issues or if the profile doesn't exist),
+  // shows an error message and pops the page.
   Future<void> _loadProfile() async {
-    final profile = await _account.getUserProfile();
+    final UserProfile? profile;
+
+    if (widget.userId == null) {
+      profile = await _account.getUserProfile();
+    } else {
+      profile = await _account.getProfileById(widget.userId!);
+    }
+
+    if (!mounted) return;
+
+    if (profile == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile not found')),
+      );
+      Navigator.maybePop(context);
+      return;
+    }
+
     setState(() => _profile = profile);
   }
 
@@ -151,84 +183,94 @@ class _ProfilePageState extends State<ProfilePage> {
                                     ],
                                   ),
                                 ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Expanded(
-                                      child: FilledButton(
-                                        style: FilledButton.styleFrom(
-                                          backgroundColor:
-                                              const Color(0xFF211D18),
-                                          foregroundColor: Colors.white,
-                                          disabledBackgroundColor: const Color(0xFF211D18),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(16),
-                                          ),
-                                        ),
-                                        onPressed: _profile == null
-                                            ? null
-                                            : _editProfile,
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              Icons.edit,
-                                              color: Colors.white,
+                                if (_isOwnProfile)
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Expanded(
+                                        child: FilledButton(
+                                          style: FilledButton.styleFrom(
+                                            backgroundColor:
+                                                const Color(0xFF211D18),
+                                            foregroundColor: Colors.white,
+                                            disabledBackgroundColor: const Color(0xFF211D18),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(16),
                                             ),
-                                            SizedBox(width: 5,),
-                                            Flexible(
-                                              child: Text(
-                                                "Edit Profile",
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
-                                                  fontSize: labelSize,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.white
+                                          ),
+                                          onPressed: _profile == null || !_isOwnProfile // prevet others editing another user's profile
+                                              ? null
+                                              : _editProfile,
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                Icons.edit,
+                                                color: Colors.white,
+                                              ),
+                                              SizedBox(width: 5,),
+                                              Flexible(
+                                                child: Text(
+                                                  "Edit Profile",
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                    fontSize: labelSize,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.white
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    SizedBox(width: 20),
-                                    Expanded(
-                                      child: FilledButton(
-                                        style: FilledButton.styleFrom(
-                                          backgroundColor:
-                                              AppColors.lightWidgetBackground,
-                                          foregroundColor: Colors.white,
-                                          disabledBackgroundColor: AppColors.lightWidgetBackground,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(16),
-                                          ),
-                                        ),
-                                        onPressed: null,
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              Icons.share,
-                                              color: Colors.white,
+                                      SizedBox(width: 20),
+                                      Expanded(
+                                        child: FilledButton(
+                                          style: FilledButton.styleFrom(
+                                            backgroundColor:
+                                                AppColors.lightWidgetBackground,
+                                            foregroundColor: Colors.white,
+                                            disabledBackgroundColor: AppColors.lightWidgetBackground,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(16),
                                             ),
-                                            SizedBox(width: 5,),
-                                            Flexible(
-                                              child: Text(
-                                                "Share Code",
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
-                                                  fontSize: labelSize,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.white
+                                          ),
+                                          onPressed: _profile == null || !_isOwnProfile // prevent others sharing another user's profile
+                                              ? null
+                                              : () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (_) => ShareCodePage(profile: _profile!),
+                                                    ),
+                                                  );
+                                                },  
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                Icons.share,
+                                                color: Colors.white,
+                                              ),
+                                              SizedBox(width: 5,),
+                                              Flexible(
+                                                child: Text(
+                                                  "Share Code",
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                    fontSize: labelSize,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.white
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                          ],
+                                            ],
+                                          )
                                         )
                                       )
-                                    )
-                                  ],
-                                )
+                                    ],
+                                  )
                               ],
                             ),
                           ],
