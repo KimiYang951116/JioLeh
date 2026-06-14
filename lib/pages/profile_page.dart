@@ -183,84 +183,94 @@ class _ProfilePageState extends State<ProfilePage> {
                                     ],
                                   ),
                                 ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Expanded(
-                                      child: FilledButton(
-                                        style: FilledButton.styleFrom(
-                                          backgroundColor:
-                                              const Color(0xFF211D18),
-                                          foregroundColor: Colors.white,
-                                          disabledBackgroundColor: const Color(0xFF211D18),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(16),
-                                          ),
-                                        ),
-                                        onPressed: _profile == null
-                                            ? null
-                                            : _editProfile,
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              Icons.edit,
-                                              color: Colors.white,
+                                if (_isOwnProfile)
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Expanded(
+                                        child: FilledButton(
+                                          style: FilledButton.styleFrom(
+                                            backgroundColor:
+                                                const Color(0xFF211D18),
+                                            foregroundColor: Colors.white,
+                                            disabledBackgroundColor: const Color(0xFF211D18),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(16),
                                             ),
-                                            SizedBox(width: 5,),
-                                            Flexible(
-                                              child: Text(
-                                                "Edit Profile",
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
-                                                  fontSize: labelSize,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.white
+                                          ),
+                                          onPressed: _profile == null || !_isOwnProfile // prevet others editing another user's profile
+                                              ? null
+                                              : _editProfile,
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                Icons.edit,
+                                                color: Colors.white,
+                                              ),
+                                              SizedBox(width: 5,),
+                                              Flexible(
+                                                child: Text(
+                                                  "Edit Profile",
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                    fontSize: labelSize,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.white
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    SizedBox(width: 20),
-                                    Expanded(
-                                      child: FilledButton(
-                                        style: FilledButton.styleFrom(
-                                          backgroundColor:
-                                              AppColors.lightWidgetBackground,
-                                          foregroundColor: Colors.white,
-                                          disabledBackgroundColor: AppColors.lightWidgetBackground,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(16),
-                                          ),
-                                        ),
-                                        onPressed: null,
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              Icons.share,
-                                              color: Colors.white,
+                                      SizedBox(width: 20),
+                                      Expanded(
+                                        child: FilledButton(
+                                          style: FilledButton.styleFrom(
+                                            backgroundColor:
+                                                AppColors.lightWidgetBackground,
+                                            foregroundColor: Colors.white,
+                                            disabledBackgroundColor: AppColors.lightWidgetBackground,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(16),
                                             ),
-                                            SizedBox(width: 5,),
-                                            Flexible(
-                                              child: Text(
-                                                "Share Code",
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
-                                                  fontSize: labelSize,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.white
+                                          ),
+                                          onPressed: _profile == null || !_isOwnProfile // prevent others sharing another user's profile
+                                              ? null
+                                              : () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (_) => ShareCodePage(profile: _profile!),
+                                                    ),
+                                                  );
+                                                },  
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                Icons.share,
+                                                color: Colors.white,
+                                              ),
+                                              SizedBox(width: 5,),
+                                              Flexible(
+                                                child: Text(
+                                                  "Share Code",
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                    fontSize: labelSize,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.white
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                          ],
+                                            ],
+                                          )
                                         )
                                       )
-                                    )
-                                  ],
-                                )
+                                    ],
+                                  )
                               ],
                             ),
                           ],
