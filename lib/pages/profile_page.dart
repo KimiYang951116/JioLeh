@@ -188,6 +188,13 @@ class _ProfilePageState extends State<ProfilePage> {
                                     CircleAvatar(
                                       radius: 30,
                                       backgroundColor: AppColors.darkWidgetBackground,
+                                      foregroundImage:
+                                        _profile?.avatarUrl == null || _profile!.avatarUrl!.isEmpty
+                                            ? null
+                                            : NetworkImage(_profile!.avatarUrl!),
+                                      child: _profile?.avatarUrl == null || _profile!.avatarUrl!.isEmpty
+                                        ? const Icon(Icons.person, color: Colors.white)
+                                        : null,
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
