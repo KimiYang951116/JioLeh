@@ -7,14 +7,18 @@ import 'friends_service.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+/// A singleton class that provides access to all application services.
+///
+/// This class centralizes service instantiation and ensures that dependencies,
+/// such as the [SupabaseClient] and [AuthService], are shared across services.
 class Services {
   static final _client = Supabase.instance.client;
 
   static final auth = AuthService(client: _client);
 
-  static final pins = PinService(auth);
+  static final pins = PinService(client: _client, auth: auth);
   static final location = LocationService();
   static final geocoding = GeocodingService();
-  static final account = AccountService(auth);
-  static final friends = FriendsService(auth);
+  static final account = AccountService(client: _client, auth: auth);
+  static final friends = FriendsService(client: _client, auth: auth);
 }

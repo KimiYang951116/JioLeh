@@ -19,10 +19,10 @@ void main() {
     });
 
     group('getCurrentUserId', () {
-      test('throws StateError when there is no current user', () {
+      test('throws NotSignedInException when there is no current user', () {
         final auth = AuthService(currentUser: () => null);
 
-        expect(auth.getCurrentUserId, throwsStateError);
+        expect(auth.getCurrentUserId, throwsA(isA<NotSignedInException>()));
       });
 
       test('returns the current user ID when there is a current user', () {

@@ -1,10 +1,17 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 import 'package:flutter/foundation.dart';
 
+/// Service class responsible for handling user authentication using Supabase.
+///
+/// This service provides methods for signing in with Google, signing out,
+/// checking the current authentication state, and retrieving user information.
 class AuthService {
-  // Fields used for authentication and database operations.
-  // This can be provided via the constructor for testing purposes.
+  /// Creates an [AuthService] instance.
+  ///
+  /// [client] is the real Supabase dependency used by the app.
+  ///
+  /// The function parameters are smaller test hooks. They let tests control
+  /// auth state and behavior without signing in to Supabase for real.
   AuthService({
     SupabaseClient? client,
     Session? Function()? currentSession,
@@ -23,11 +30,12 @@ class AuthService {
   final Future<UserResponse> Function()? _getUser;
   final Future<void> Function()? _signOut;
 
+  /// Returns the underlying Supabase client.
   SupabaseClient get _supabase => _client ?? Supabase.instance.client;
 
-  SupabaseClient get client => _supabase;
-
   User? getCurrentUser() {
+    // Tests can inject currentUser to avoid depending on Supabase global state.
+    // Production falls back to the real Supabase auth user.
     if (_currentUser != null) {
       return _currentUser();
     }
@@ -36,7 +44,8 @@ class AuthService {
   }
 
   Session? _getCurrentSession() {
-    // Helper method to retrieve the current session from the Supabase client.
+    // Tests can inject currentSession to control signed-in state.
+    // Production falls back to the real Supabase auth session.
     if (_currentSession != null) {
       return _currentSession();
     }
@@ -48,15 +57,17 @@ class AuthService {
     return _getCurrentSession() != null;
   }
 
-  /// Function to check if the current session is still valid by attempting to fetch the user data.
+  /// Checks if the current session is valid by attempting to fetch the user profile from Supabase.
   ///
-  /// Returns true if the session is valid and the user is authenticated, false otherwise.
+  /// Returns `true` if the session is valid and the user is retrieved, `false` otherwise.
   Future<bool> hasValidSession() async {
     if (!isSignedIn()) {
       return false;
     }
 
     try {
+      // Tests can inject getUser to control session validation results.
+      // Production falls back to the real Supabase auth getUser call.
       final response = await (_getUser != null
           ? _getUser()
           : _supabase.auth.getUser());
@@ -66,22 +77,27 @@ class AuthService {
     }
   }
 
+  /// Returns the email address of the currently signed-in user.
+  ///
+  /// Returns null if no user is signed in or if the user has no email.
+  String? getCurrentUserEmail() {
+    return getCurrentUser()?.email;
+  }
+
+  /// Returns the unique ID of the currently signed-in user.
+  ///
+  /// Throws a [NotSignedInException] if no user is signed in.
   String getCurrentUserId() {
-    // Retrieves the current user's ID,
-    // throwing an error if no user is signed in.
     final userId = getCurrentUser()?.id;
 
     if (userId == null) {
-      // StateError is used here to indicate that the application is in an unexpected state
-      // (i.e., a user ID is required but not available).
-
-      // TO-DO: Catch and handle this error in PinService
-      throw StateError('User must be signed in.');
+      throw const NotSignedInException();
     }
 
     return userId;
   }
 
+  /// Returns a stream of [AuthState] that notifies listeners of changes to the user's authentication status.
   Stream<AuthState> authStateChanges() {
     // The onAuthStateChange stream emits an event
     // whenever the authentication state changes (e.g., user signs in, signs out, or the session expires).
@@ -90,6 +106,7 @@ class AuthService {
     return _supabase.auth.onAuthStateChange;
   }
 
+  /// Initiates the Google sign-in flow using Supabase's authentication API.
   Future<void> signInWithGoogle() async {
     // Initiates the Google sign-in flow using Supabase's authentication API.
     // On web, it will open a popup; on mobile, it will launch the system browser
@@ -104,6 +121,7 @@ class AuthService {
     );
   }
 
+  /// Signs out the current user from the application.
   Future<void> signOut() async {
     if (_signOut != null) {
       await _signOut();
@@ -112,4 +130,19 @@ class AuthService {
 
     await _supabase.auth.signOut();
   }
+}
+
+/// Base class for authentication-related exceptions raised by this app.
+class AuthServiceException implements Exception {
+  final String message;
+
+  const AuthServiceException(this.message);
+
+  @override
+  String toString() => message;
+}
+
+/// Exception thrown when an operation requires a signed-in user.
+class NotSignedInException extends AuthServiceException {
+  const NotSignedInException() : super('User must be signed in.');
 }
