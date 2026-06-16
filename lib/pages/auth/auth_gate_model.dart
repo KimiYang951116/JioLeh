@@ -54,9 +54,10 @@ class AuthGateModel extends ChangeNotifier {
         AuthGateResult.needsOnboarding => AuthGateScreen.onboarding,
         AuthGateResult.ready => AuthGateScreen.map,
       });
-    // catch(_) means catch whatever error without caring what is the error
-    } catch (_) {
-      // No need to switch the screen to error is not the triggering ticket
+    } catch (error, stackTrace) {
+      // Log the real cause so failures are diagnosable instead of swallowed.
+      debugPrint('AuthGate check failed: $error\n$stackTrace');
+      // No need to switch the screen to error if this is not the latest ticket.
       if (_disposed || myCheck != _latestCheck) return;
       // Errors show a retry screen instead of forcing login.
       _setScreen(AuthGateScreen.error);

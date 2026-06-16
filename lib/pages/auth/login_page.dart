@@ -25,9 +25,12 @@ class _AuthPageState extends State<AuthPage> {
 
     try {
       await auth.signInWithGoogle();
-    } catch (error) {
+    } catch (error, stackTrace) {
+      // Log the real cause so failures are diagnosable, then show the user an
+      // honest, actionable message instead of a generic "unexpected" one.
+      debugPrint('Google sign-in failed: $error\n$stackTrace');
       if (mounted) {
-        _showSnackBar('Unexpected Error.');
+        _showSnackBar('Could not start sign-in. Check your connection and try again.');
       }
     } finally {
       if (mounted) {
