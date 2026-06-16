@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:jio_leh/services/service_provider.dart';
+import 'package:jio_leh/app/service_provider.dart';
 
 import 'login_widgets.dart';
 

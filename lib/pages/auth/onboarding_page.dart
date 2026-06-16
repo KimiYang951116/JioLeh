@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 
 import 'package:jio_leh/services/account_service.dart';
 import 'package:jio_leh/services/auth_service.dart';
-import 'package:jio_leh/services/service_provider.dart';
+import 'package:jio_leh/app/service_provider.dart';
 import 'package:jio_leh/theme.dart';
 
 import 'onboarding_widgets.dart';

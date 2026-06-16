@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-import 'package:jio_leh/routing/auth_gate_resolver.dart';
+import 'package:jio_leh/pages/auth/gate/auth_gate_resolver.dart';
 import 'package:jio_leh/services/account_service.dart';
 import 'package:jio_leh/services/auth_service.dart';
 

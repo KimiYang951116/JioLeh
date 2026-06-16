@@ -6,11 +6,11 @@ import 'package:jio_leh/pages/auth/login_page.dart';
 import 'package:jio_leh/pages/map/map_page.dart';
 import 'package:jio_leh/pages/auth/onboarding_page.dart';
 
-import 'package:jio_leh/pages/auth/auth_gate_model.dart';
-import 'package:jio_leh/pages/auth/profile_link_holder.dart';
+import 'package:jio_leh/pages/auth/gate/auth_gate_model.dart';
+import 'package:jio_leh/pages/auth/gate/profile_link_holder.dart';
 
 import 'package:jio_leh/routing/app_routing.dart';
-import 'package:jio_leh/services/service_provider.dart';
+import 'package:jio_leh/app/service_provider.dart';
 
 import 'package:app_links/app_links.dart';
 
