@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:jio_leh/pages/auth/profile_link_holder.dart';
+import 'package:jio_leh/pages/auth/gate/profile_link_holder.dart';
 
 void main() {
   // A real profile deep link, and a link that is not a profile link.

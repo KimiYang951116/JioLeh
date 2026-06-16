@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'package:jio_leh/pages/auth/auth_gate.dart';
+import 'package:jio_leh/pages/auth/gate/auth_gate.dart';
 
-import 'package:jio_leh/services/service_provider.dart';
+import 'package:jio_leh/app/service_provider.dart';
 
 
 final navigatorKey = GlobalKey<NavigatorState>();

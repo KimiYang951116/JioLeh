@@ -1,4 +1,4 @@
-import 'package:jio_leh/routing/deep_link_parser.dart';
+import 'package:jio_leh/pages/auth/gate/deep_link_parser.dart';
 
 /// Remembers a profile link that arrives before the app is ready to show it,
 /// then hands it back once the app is ready.

@@ -1,4 +1,4 @@
-import "package:jio_leh/pages/profile_page.dart";
+import "package:jio_leh/pages/profile/profile_page.dart";
 import "package:flutter/material.dart";
 
 class AppRoutes {

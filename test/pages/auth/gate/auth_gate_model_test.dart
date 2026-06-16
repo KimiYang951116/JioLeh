@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
-import 'package:jio_leh/pages/auth/auth_gate_model.dart';
+import 'package:jio_leh/pages/auth/gate/auth_gate_model.dart';
 import 'package:jio_leh/services/account_service.dart';
 
-import '../../services/fakes/fake_auth_service.dart';
+import '../../../services/fakes/fake_auth_service.dart';
 
 // AccountService isn't an interface, but mocktail can still fake it so we can
 // control what profileExists() returns.
