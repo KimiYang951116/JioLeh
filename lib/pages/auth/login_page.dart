@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:jio_leh/services/services.dart';
+import 'package:jio_leh/services/service_provider.dart';
 
 import 'login_widgets.dart';
 
@@ -14,15 +14,17 @@ class AuthPage extends StatefulWidget {
 }
 
 class _AuthPageState extends State<AuthPage> {
-  final _auth = Services.auth;
-
   bool _isSigningIn = false;
 
   Future<void> _signInWithGoogle() async {
+    // Read the service from the provider before the first await (context is
+    // valid here because this runs after the widget is built).
+    final auth = ServiceProvider.of(context)!.auth;
+
     setState(() => _isSigningIn = true);
 
     try {
-      await _auth.signInWithGoogle();
+      await auth.signInWithGoogle();
     } catch (error) {
       if (mounted) {
         _showSnackBar('Unexpected Error.');
