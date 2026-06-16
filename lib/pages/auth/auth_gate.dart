@@ -12,7 +12,7 @@ import 'package:jio_leh/routing/deep_link_parser.dart';
 
 import 'package:jio_leh/services/account_service.dart';
 import 'package:jio_leh/services/auth_service.dart';
-import 'package:jio_leh/services/services.dart';
+import 'package:jio_leh/services/service_provider.dart';
 
 import 'package:app_links/app_links.dart';
 
@@ -22,25 +22,21 @@ enum _GateState { loading, signedOut, needsOnboarding, ready, error }
 ///
 /// This widget is a small UI gate: it listens for auth changes, asks the
 /// resolver for the current app state, then renders login, onboarding, map, or
-/// retry UI. Tests can inject [auth] and [account]; the real app falls back to
-/// the shared [Services] instances.
+/// retry UI. Services come from the nearest [ServiceProvider]; tests wrap the
+/// gate in a [ServiceProvider] with fakes.
 class AuthGate extends StatefulWidget {
-  const AuthGate({super.key, AuthService? auth, AccountService? account})
-    : _auth = auth,
-      _account = account;
-
-  final AuthService? _auth;
-  final AccountService? _account;
+  const AuthGate({super.key});
 
   @override
   State<AuthGate> createState() => _AuthGateState();
 }
 
 class _AuthGateState extends State<AuthGate> {
-  // Use injected services in tests. In the real app, use the shared services
-  // created in Services so the whole app talks to the same Supabase client.
-  late final _auth = widget._auth ?? Services.auth;
-  late final _account = widget._account ?? Services.account;
+  // Services come from the ServiceProvider above this widget. They can't be
+  // read in initState, so they're assigned in didChangeDependencies.
+  late final AuthService _auth;
+  late final AccountService _account;
+  bool _didInit = false;
   late final StreamSubscription<dynamic> _authSub;
   _GateState _state = _GateState.loading;
   late final AppLinks _appLinks;
@@ -66,6 +62,26 @@ class _AuthGateState extends State<AuthGate> {
     super.initState();
     _appLinks = AppLinks();
     _linkSub = _appLinks.uriLinkStream.listen(_handleLink);
+  }
+
+  // didChangeDependencies runs just AFTER initState, and again any time an InheritedWidget we read from changes
+  // We use it (not initState) because reading ServiceProvider.of(context) needs the widget to be wired into the
+  // tree first, which isn't true yet in initState.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // This method can run more than once, but our setup (subscribe to auth,
+    // resolve the first screen) must happen exactly once. The _didInit flag
+    // makes it run-once: do the work, flip the flag, skip on later calls.
+    if (_didInit) return;
+    _didInit = true;
+
+    // Now it's safe to read the services handed down by the ServiceProvider
+    // above us in the tree.
+    final services = ServiceProvider.of(context)!;
+    _auth = services.auth;
+    _account = services.account;
 
     // Re-resolve whenever the user signs in or out, then resolve once now
     // for the current session.

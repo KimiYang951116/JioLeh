@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+
 import 'package:jio_leh/pages/auth/auth_gate.dart';
+
+import 'package:jio_leh/services/service_provider.dart';
+
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
@@ -8,10 +12,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      navigatorKey: navigatorKey,
-      home: const AuthGate(),
+    return ServiceProvider(
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        navigatorKey: navigatorKey,
+        home: const AuthGate(),
+      ),
     );
   }
 }
