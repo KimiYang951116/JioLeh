@@ -23,6 +23,10 @@ class AppColors {
   // Near-black face of the dark buttons (Google sign-in, etc.).
   static const darkButton = Color(0xFF211D18);
 
+  // Destructive action button (e.g. delete account): face + darker shadow.
+  static const danger = Color(0xFFD84B3A);
+  static const dangerShadow = Color(0xFF9E2F24);
+
   // Muted greys for secondary text on the auth screens.
   static const taglineText = Color(0xFF776F65);
   static const authBodyText = Color(0xFF7A736A);

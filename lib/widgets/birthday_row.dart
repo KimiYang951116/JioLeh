@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:jio_leh/theme.dart';
+import 'package:jio_leh/util/birthday.dart';
 import 'package:jio_leh/widgets/app_field_box.dart';
 import 'package:jio_leh/widgets/app_text_field.dart';
 
 /// The day / month / year input row used by birthday fields. The "BIRTHDAY"
-/// label above it stays with the form, not here.
+/// label above it stays with the form, not here. The month options come from
+/// the shared [kMonthNames].
 ///
 /// * [dayController]: Controller for the day (DD) field.
 /// * [yearController]: Controller for the year (YYYY) field.
 /// * [selectedMonth]: The currently selected month, or null if none.
-/// * [months]: The month names shown in the dropdown.
 /// * [onMonthChanged]: Called when the user picks a different month.
 class BirthdayRow extends StatelessWidget {
   const BirthdayRow({
@@ -18,14 +20,12 @@ class BirthdayRow extends StatelessWidget {
     required this.dayController,
     required this.yearController,
     required this.selectedMonth,
-    required this.months,
     required this.onMonthChanged,
   });
 
   final TextEditingController dayController;
   final TextEditingController yearController;
   final String? selectedMonth;
-  final List<String> months;
   final ValueChanged<String?> onMonthChanged;
 
   @override
@@ -40,6 +40,10 @@ class BirthdayRow extends StatelessWidget {
             controller: dayController,
             hintText: "DD",
             keyboardType: TextInputType.number,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(2),
+            ],
           ),
         ),
         const SizedBox(width: 10),
@@ -67,7 +71,7 @@ class BirthdayRow extends StatelessWidget {
                 ),
                 dropdownColor: AppColors.lightBackground,
                 borderRadius: BorderRadius.circular(AppRadii.elements),
-                items: months.map((String month) {
+                items: kMonthNames.map((String month) {
                   return DropdownMenuItem<String>(
                     value: month,
                     child: Text(month, overflow: TextOverflow.ellipsis),
@@ -85,6 +89,10 @@ class BirthdayRow extends StatelessWidget {
             controller: yearController,
             hintText: "YYYY",
             keyboardType: TextInputType.number,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(4),
+            ],
           ),
         ),
       ],

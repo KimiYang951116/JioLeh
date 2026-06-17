@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
+import 'package:jio_leh/pages/profile/username_rule.dart';
 import 'package:jio_leh/theme.dart';
 import 'package:jio_leh/widgets/app_section_label.dart';
 import 'package:jio_leh/widgets/app_text_field.dart';
@@ -64,7 +64,6 @@ class WelcomeHeader extends StatelessWidget {
 /// * [dayController]: Controller for the birthday day (DD) field.
 /// * [yearController]: Controller for the birthday year (YYYY) field.
 /// * [selectedMonth]: The currently selected birthday month, or null.
-/// * [months]: The month names shown in the birthday dropdown.
 /// * [onMonthChanged]: Called when the user picks a different month.
 class ProfileForm extends StatelessWidget {
   const ProfileForm({
@@ -74,7 +73,6 @@ class ProfileForm extends StatelessWidget {
     required this.dayController,
     required this.yearController,
     required this.selectedMonth,
-    required this.months,
     required this.onMonthChanged,
   });
 
@@ -83,7 +81,6 @@ class ProfileForm extends StatelessWidget {
   final TextEditingController dayController;
   final TextEditingController yearController;
   final String? selectedMonth;
-  final List<String> months;
   final ValueChanged<String?> onMonthChanged;
 
   @override
@@ -99,11 +96,8 @@ class ProfileForm extends StatelessWidget {
             const SizedBox(height: 10),
             AppTextField(
               controller: usernameController,
-              hintText: "3-10 lowercase letters or digits",
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'[a-z0-9]')),
-                LengthLimitingTextInputFormatter(10),
-              ],
+              hintText: UsernameRule.hint,
+              inputFormatters: UsernameRule.inputFormatters,
             ),
             const SizedBox(height: 30),
             const AppSectionLabel("YOUR NAME"),
@@ -119,7 +113,6 @@ class ProfileForm extends StatelessWidget {
               dayController: dayController,
               yearController: yearController,
               selectedMonth: selectedMonth,
-              months: months,
               onMonthChanged: onMonthChanged,
             ),
           ],
