@@ -60,7 +60,7 @@ class AppPrimaryButton extends StatelessWidget {
             ),
             elevation: 0,
             textStyle: const TextStyle(
-              fontSize: 16,
+              fontSize: AppTextSizes.button,
               fontWeight: FontWeight.w800,
             ),
           ),
