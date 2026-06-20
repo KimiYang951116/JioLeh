@@ -61,7 +61,8 @@ class AppButtonHeights {
 
 // The text sizes used in the app, defined as constants for consistency and easy maintenance.
 class AppTextSizes {
-  static const heading = 26.0;
+  static const heading = 28.0; // page titles (AppPageHeader)
+  static const onboardingHeading = 26.0;
   static const subtitle = 18.0;
   static const body = 16.0;
   static const textFieldHint = 16.0;
