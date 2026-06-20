@@ -11,6 +11,7 @@ import 'package:jio_leh/services/friends_service.dart';
 import "package:jio_leh/theme.dart";
 import 'package:jio_leh/pages/profile/share_code_page.dart';
 import 'package:jio_leh/widgets/app_page_header.dart';
+import 'package:jio_leh/widgets/app_snack_bar.dart';
 import 'package:jio_leh/pages/profile/widgets/profile_card.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -74,9 +75,7 @@ class _ProfilePageState extends State<ProfilePage> {
     if (!mounted) return;
 
     if (profile == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile not found')),
-      );
+      context.showAppSnackBar('Profile not found', kind: SnackBarKind.error);
       Navigator.maybePop(context);
       return;
     }
@@ -103,19 +102,14 @@ class _ProfilePageState extends State<ProfilePage> {
 
       setState(() => _friendRequestSent = true);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Friend request sent to ${profile.displayName}',
-          ),
-        ),
+      context.showAppSnackBar(
+        'Friend request sent to ${profile.displayName}',
+        kind: SnackBarKind.success,
       );
     } catch (error) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$error')),
-      );
+      context.showAppSnackBar('$error', kind: SnackBarKind.error);
     } finally {
       if (mounted) {
         setState(() => _sendingFriendRequest = false);

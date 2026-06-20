@@ -6,6 +6,7 @@ import 'package:jio_leh/theme.dart';
 import 'package:jio_leh/util/birthday.dart';
 import 'package:jio_leh/widgets/app_primary_button.dart';
 import 'package:jio_leh/widgets/app_section_label.dart';
+import 'package:jio_leh/widgets/app_snack_bar.dart';
 import 'package:jio_leh/widgets/app_text_field.dart';
 import 'package:jio_leh/widgets/birthday_row.dart';
 
@@ -58,8 +59,9 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
     final bio = _bioController.text.trim();
 
     if (displayName.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Display name cannot be empty.')),
+      context.showAppSnackBar(
+        'Display name cannot be empty.',
+        kind: SnackBarKind.error,
       );
       return;
     }
@@ -72,9 +74,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         month: _selectedMonth,
       );
     } on FormatException catch (error) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error.message)));
+      context.showAppSnackBar(error.message, kind: SnackBarKind.error);
       return;
     }
 
@@ -95,8 +95,9 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
       }
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not save profile: $error')),
+        context.showAppSnackBar(
+          'Could not save profile: $error',
+          kind: SnackBarKind.error,
         );
       }
     } finally {
@@ -171,7 +172,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                       controller: _displayNameController,
                       hintText: "What should we call you?",
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 20,),
                     const AppSectionLabel(text: "BIO"),
                     const SizedBox(height: 10),
                     AppTextField(
@@ -182,7 +183,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                     ),
                     const SizedBox(height: 20),
                     const AppSectionLabel(text: "BIRTHDAY"),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 10,),
                     BirthdayRow(
                       dayController: _dayController,
                       yearController: _yearController,

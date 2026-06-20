@@ -9,6 +9,7 @@ import 'package:jio_leh/app/service_provider.dart';
 import 'package:jio_leh/theme.dart';
 import 'package:jio_leh/util/birthday.dart';
 import 'package:jio_leh/widgets/app_primary_button.dart';
+import 'package:jio_leh/widgets/app_snack_bar.dart';
 
 import 'widgets/welcome_header.dart';
 import 'widgets/profile_form.dart';
@@ -84,9 +85,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     // Authoritative client-side rule lives in UsernameRule.
     final username = _usernameController.text.trim().toLowerCase();
     if (!UsernameRule.isValid(username)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(UsernameRule.errorMessage)),
-      );
+      context.showAppSnackBar(UsernameRule.errorMessage, kind: SnackBarKind.error);
       return;
     }
 
@@ -98,9 +97,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
         month: _selectedMonth,
       );
     } on FormatException catch (error) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error.message)));
+      context.showAppSnackBar(error.message, kind: SnackBarKind.error);
       return;
     }
 
@@ -116,14 +113,16 @@ class _OnboardingPageState extends State<OnboardingPage> {
       await widget.onComplete?.call();
     } on UsernameTaken {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('That username is taken — try another.')),
+        context.showAppSnackBar(
+          'That username is taken — try another.',
+          kind: SnackBarKind.error,
         );
       }
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not save profile: $error')),
+        context.showAppSnackBar(
+          'Could not save profile: $error',
+          kind: SnackBarKind.error,
         );
       }
     } finally {
