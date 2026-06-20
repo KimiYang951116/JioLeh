@@ -10,7 +10,8 @@ import 'package:jio_leh/theme.dart';
 import 'package:jio_leh/util/birthday.dart';
 import 'package:jio_leh/widgets/app_primary_button.dart';
 
-import 'onboarding_widgets.dart';
+import 'widgets/welcome_header.dart';
+import 'widgets/profile_form.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key, this.onComplete});
