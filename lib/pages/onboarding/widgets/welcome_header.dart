@@ -7,7 +7,7 @@ class WelcomeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final onBoardingTitleSize = context.scaledFont(AppTextSizes.heading);
+    final onBoardingTitleSize = context.scaledFont(AppTextSizes.onboardingHeading);
     final subtitleSize = context.scaledFont(AppTextSizes.subtitle);
 
     return SizedBox(

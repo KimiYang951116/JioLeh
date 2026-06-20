@@ -4,6 +4,7 @@ import 'package:jio_leh/models/user_profile.dart';
 import 'package:jio_leh/app/service_provider.dart';
 import 'package:jio_leh/theme.dart';
 import 'package:jio_leh/util/birthday.dart';
+import 'package:jio_leh/widgets/app_page_header.dart';
 import 'package:jio_leh/widgets/app_primary_button.dart';
 import 'package:jio_leh/widgets/app_section_label.dart';
 import 'package:jio_leh/widgets/app_snack_bar.dart';
@@ -109,7 +110,6 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
 
   @override
   Widget build(BuildContext context) {
-    final titleSize = context.scaledFont(AppTextSizes.heading) + 2;
     final labelSize = context.scaledFont(AppTextSizes.label);
     return Scaffold(
       backgroundColor: AppColors.lightBackground,
@@ -124,22 +124,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Row(
-                      children: [
-                        Text(
-                          "Edit Profile",
-                          style: TextStyle(
-                            fontSize: titleSize,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                        const SizedBox(width: 100),
-                        FilledButton(
-                          onPressed: () => Navigator.maybePop(context),
-                          child: const Text("Back"),
-                        ),
-                      ],
-                    ),
+                    const AppPageHeader(title: "Edit Profile"),
                     const SizedBox(height: 5),
                     const AppSectionLabel(text: "PROFILE PHOTO"),
                     const SizedBox(height: 10),

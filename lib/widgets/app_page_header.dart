@@ -15,7 +15,7 @@ class AppPageHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final titleSize = context.scaledFont(AppTextSizes.heading) + 2;
+    final titleSize = context.scaledFont(AppTextSizes.heading);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
