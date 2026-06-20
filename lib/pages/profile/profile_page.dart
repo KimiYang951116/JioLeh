@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
 import 'package:jio_leh/models/user_profile.dart';
-import 'package:jio_leh/pages/profile/profile_edit_page.dart';
 
 import 'package:jio_leh/app/service_provider.dart';
+import 'package:jio_leh/routing/app_routing.dart';
 import 'package:jio_leh/services/account_service.dart';
 import 'package:jio_leh/services/auth_service.dart';
 import 'package:jio_leh/services/friends_service.dart';
 
 import "package:jio_leh/theme.dart";
-import 'package:jio_leh/pages/profile/share_code_page.dart';
+
 import 'package:jio_leh/widgets/app_page_header.dart';
 import 'package:jio_leh/widgets/app_snack_bar.dart';
 import 'package:jio_leh/pages/profile/widgets/profile_card.dart';
@@ -121,11 +121,9 @@ class _ProfilePageState extends State<ProfilePage> {
     final profile = _profile;
     if (profile == null) return;
 
-    final updatedProfile = await Navigator.push<UserProfile>(
+    final updatedProfile = await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => ProfileEditPage(profile: profile),
-      ),
+      AppRoutes.profileEdit(profile),
     );
 
     if (updatedProfile != null && mounted) {
@@ -154,9 +152,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       onEdit: _editProfile,
                       onShare: () => Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (_) => ShareCodePage(profile: _profile!),
-                        ),
+                        // ! operator is need to ensure that profile is loaded and throw errors if profile is null
+                        AppRoutes.shareCode(_profile!)
                       ),
                       isSendingRequest: _sendingFriendRequest,
                       requestSent: _friendRequestSent,
