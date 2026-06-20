@@ -2,12 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/services.dart';
 
-/// Username rules such as the field's hint, input formatters, submit-time validation,
-/// and the auto-generated fallback all derive from here, so the rule can never drift.
+/// Helping class for full username rules and texts to display during error handling
 class UsernameRule {
-  // all static here, so just call UsernameRule.generate() / .isValid(...) —
-  // When using DONT create an instance (don't do UsernameRule()).
-  // this class is intended to work like the math lib in java cs2030s as a static only class
+  // When using DONT create an instance (don't do UsernameRule())
   // Private Constructor: no other file can call it to create instance obj
   const UsernameRule._();
 
@@ -30,7 +27,9 @@ class UsernameRule {
 
   static bool isValid(String username) => _full.hasMatch(username);
 
-  /// Generates a random username that satisfies this rule.
+  /// Generates a random username, used as a fallback method for default usernames
+  /// 
+  /// Returns an 8 character String password that follows the username rules
   static String generate() {
     final random = Random();
     String code = '';
@@ -40,7 +39,6 @@ class UsernameRule {
     return code;
   }
 
-  /// Hint copy, built from the numbers so it never goes stale.
   static const hint = '$minLength-$maxLength lowercase letters or digits';
 
   /// Error shown when validation fails.
