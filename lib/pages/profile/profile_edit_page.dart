@@ -157,7 +157,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                       controller: _displayNameController,
                       hintText: "What should we call you?",
                     ),
-                    const SizedBox(height: 20,),
+                    const SizedBox(height: 20),
                     const AppSectionLabel(text: "BIO"),
                     const SizedBox(height: 10),
                     AppTextField(
@@ -168,7 +168,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                     ),
                     const SizedBox(height: 20),
                     const AppSectionLabel(text: "BIRTHDAY"),
-                    const SizedBox(height: 10,),
+                    const SizedBox(height: 10),
                     BirthdayRow(
                       dayController: _dayController,
                       yearController: _yearController,
