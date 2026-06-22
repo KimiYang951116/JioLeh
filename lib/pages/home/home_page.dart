@@ -38,8 +38,8 @@ class _HomePageState extends State<HomePage> {
   ];
 
   Future<void> _openCreatePin() async {
-    // UI-only for now: opens the form sheet without an onSave handler, so
-    // nothing is persisted. TODO: wire up saving (GPS coords + Services.pins).
+    // UI-only for now: opens the form sheet without an onSave handler, so nothing is persisted. 
+    // TODO: wire up saving (GPS coords + Services.pins).
     await showLocationCustomizeSheet(context, PinType.restaurant);
   }
 
