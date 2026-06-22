@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:jio_leh/pages/auth/gate/auth_gate.dart';
 
@@ -16,6 +17,9 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         navigatorKey: navigatorKey,
+        theme: ThemeData(
+          textTheme: GoogleFonts.gabaritoTextTheme(),
+        ),
         home: const AuthGate(),
       ),
     );
