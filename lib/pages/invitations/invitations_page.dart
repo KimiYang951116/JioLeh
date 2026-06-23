@@ -8,7 +8,6 @@ import 'package:jio_leh/pages/invitations/open_jio_form_page.dart';
 import 'package:jio_leh/pages/invitations/widgets/accepted_event_card.dart';
 import 'package:jio_leh/pages/invitations/widgets/received_event_card.dart';
 import 'package:jio_leh/pages/invitations/widgets/sent_event_card.dart';
-import 'package:jio_leh/services/services.dart';
 
 class InvitationsPage extends StatefulWidget {
   const InvitationsPage({super.key});
@@ -29,7 +28,7 @@ class _InvitationsPageState extends State<InvitationsPage> {
 
     final services = ServiceProvider.of(context)!;
     _model = InvitationsPageModel(
-      openJio: Services.openJio,
+      openJio: services.openJio,
       friends: services.friends,
       auth: services.auth,
     )
