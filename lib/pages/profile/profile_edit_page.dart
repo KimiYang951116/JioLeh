@@ -10,7 +10,7 @@ import 'package:jio_leh/widgets/app_avatar.dart';
 import 'package:jio_leh/widgets/app_field_box.dart';
 import 'package:jio_leh/widgets/app_page_header.dart';
 import 'package:jio_leh/widgets/app_primary_button.dart';
-import 'package:jio_leh/widgets/app_secondary_button.dart';
+// import 'package:jio_leh/widgets/app_secondary_button.dart';
 import 'package:jio_leh/widgets/app_section_label.dart';
 import 'package:jio_leh/widgets/app_snack_bar.dart';
 import 'package:jio_leh/widgets/app_text_field.dart';
@@ -206,6 +206,8 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                       onMonthChanged: (value) =>
                           setState(() => _selectedMonth = value),
                     ),
+                    // TODO: implement Delete Account Function
+                    /*
                     const SizedBox(height: 20),
                     Align(
                       alignment: Alignment.centerLeft,
@@ -227,35 +229,9 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                           icon: Icons.delete,
                           backgroundColor: AppColors.danger,
                         ),
-                        // child: SizedBox(
-                        //   height: 46,
-                        //   child: FilledButton(
-                        //     style: FilledButton.styleFrom(
-                        //       backgroundColor: AppColors.danger,
-                        //       foregroundColor: Colors.white,
-                        //      shape: RoundedRectangleBorder(
-                        //         borderRadius:
-                        //             BorderRadius.circular(AppRadii.elements),
-                        //       ),
-                        //       elevation: 0,
-                        //       textStyle: const TextStyle(
-                        //         fontSize: 14,
-                        //         fontWeight: FontWeight.w800,
-                        //       ),
-                        //     ),
-                        //     onPressed: () {},
-                        //     child: const Row(
-                        //       mainAxisSize: MainAxisSize.min,
-                        //       children: [
-                        //         Icon(Icons.delete, size: 18),
-                        //         SizedBox(width: 8),
-                        //         Text('Delete account'),
-                        //       ],
-                        //     ),
-                        //   ),
-                        // ),
                       ),
                     ),
+                    */
                     const Spacer(),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),

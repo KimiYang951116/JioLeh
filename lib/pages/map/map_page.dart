@@ -15,13 +15,8 @@ import 'package:jio_leh/pages/map/widgets/location_customize_sheet.dart';
 
 import 'package:jio_leh/pages/map/renders/map_pins.dart';
 
-import 'package:jio_leh/pages/profile/profile_page.dart';
-import 'package:jio_leh/pages/friends/friends_page.dart';
-
 import 'package:jio_leh/services/services.dart';
 import 'package:jio_leh/pages/map/models/pin_type.dart';
-
-import 'package:jio_leh/pages/invitations/invitations_page.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -34,7 +29,6 @@ class _MapPageState extends State<MapPage> {
   // Services are resolved from the shared composition root (Services) so the
   // whole app uses a single AuthService — and therefore a single Supabase
   // client — instead of each page constructing its own.
-  final auth = Services.auth;
   final _locationServicePins = Services.pins;
   final _geocoding = Services.geocoding;
   final _locationService = Services.location;
@@ -314,79 +308,6 @@ class _MapPageState extends State<MapPage> {
 
           // Top: current area name display
           CurrentAreaBar(locationName: _currentLocationName),
-
-          // Top right: logout button
-          Positioned(
-            top: 10,
-            right: 10,
-            child: SafeArea(
-              child: FloatingActionButton(
-                mini: true,
-                heroTag: 'logout',
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.black,
-                onPressed: () => auth.signOut(),
-                child: const Icon(Icons.logout),
-              ),
-            ),
-          ),
-
-          // Left Top: User Profile button
-          Positioned(
-            top: 90,
-            left: 10,
-            child: SafeArea(
-              child: FloatingActionButton(
-                mini: true,
-                heroTag: 'profile',
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.black,
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const ProfilePage()),
-                ),
-                child: const Icon(Icons.person),
-              ),
-            ),
-          ),
-
-          // Left Top: Friends button
-          Positioned(
-            top: 150,
-            left: 10,
-            child: SafeArea(
-              child: FloatingActionButton(
-                mini: true,
-                heroTag: 'friends',
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.black,
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const FriendsPage()),
-                ),
-                child: const Icon(Icons.people),
-              ),
-            ),
-          ),
-          // Left Top: Invitations button
-          Positioned(
-            top: 210,
-            left: 10,
-            child: SafeArea(
-              child: FloatingActionButton(
-                mini: true,
-                heroTag: 'invitations',
-                tooltip: 'Invitations',
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.black,
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const InvitationsPage()),
-                ),
-                child: const Icon(Icons.markunread_mailbox),
-              ),
-            ),
-          ),
 
           // Bottom right: recenter, and add pin buttons
           MapToolbar(onRecenter: _recenterMap, onAddPin: _addPin),
