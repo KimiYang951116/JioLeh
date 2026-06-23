@@ -153,7 +153,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
-                    child: ProfileCard(
+                    child: _profile == null
+                    ? CircularProgressIndicator()
+                    : ProfileCard(
                       profile: _profile,
                       isOwnProfile: _isOwnProfile,
                       onEdit: _editProfile,
