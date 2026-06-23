@@ -11,6 +11,7 @@ import 'package:jio_leh/services/friends_service.dart';
 import "package:jio_leh/theme.dart";
 
 import 'package:jio_leh/widgets/app_page_header.dart';
+import 'package:jio_leh/widgets/app_primary_button.dart';
 import 'package:jio_leh/widgets/app_snack_bar.dart';
 import 'package:jio_leh/pages/profile/widgets/profile_card.dart';
 
@@ -143,10 +144,18 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const AppPageHeader(title: "Profile"),
+                  AppPageHeader(
+                    title: "Profile",
+                    // Show the close (✕) button only when viewing a specific
+                    // user's profile (a pushed route, e.g. from the friends
+                    // list); the home "my profile" tab passes no userId.
+                    closeBtn: widget.userId != null,
+                  ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
-                    child: ProfileCard(
+                    child: _profile == null
+                    ? CircularProgressIndicator()
+                    : ProfileCard(
                       profile: _profile,
                       isOwnProfile: _isOwnProfile,
                       onEdit: _editProfile,
@@ -160,6 +169,16 @@ class _ProfilePageState extends State<ProfilePage> {
                       onAddFriend: _sendFriendRequest,
                     ),
                   ),
+                  // Logout only makes sense on your own profile, not when
+                  // viewing someone else's.
+                  SizedBox(height: 16,),
+                  if (_isOwnProfile)
+                    AppPrimaryButton(
+                      backgroundColor: Colors.grey,
+                      liftColor: Colors.blueGrey,
+                      label: "Log out",
+                      onPressed: () => _auth.signOut(),
+                    ),
                 ],
               ),
             );
