@@ -6,9 +6,10 @@ import 'package:jio_leh/util/datetime_format.dart';
 
 /// Organism — a tappable card for an invite the current user has accepted.
 class AcceptedEventCard extends StatelessWidget {
-  const AcceptedEventCard({super.key, required this.event});
+  const AcceptedEventCard({super.key, required this.event, required this.onLeave,});
 
   final OpenJioEvent event;
+  final VoidCallback onLeave;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +24,10 @@ class AcceptedEventCard extends StatelessWidget {
         title: Text('From ${event.senderName ?? 'Someone'}'),
         subtitle: Text(
             '${event.locationName} · ${formatDateTime(event.dateTime)}'),
-        trailing: const Icon(Icons.chevron_right),
+        trailing: TextButton(
+          onPressed: onLeave,
+          child: const Text('Leave'),
+      ),
       ),
     );
   }

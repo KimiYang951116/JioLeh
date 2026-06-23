@@ -105,6 +105,8 @@ class InvitationsPageModel extends ChangeNotifier {
 
     if (_disposed) return;
     _pendingEvents = _pendingEvents.where((e) => e.id != event.id).toList();
+    _acceptedEvents = _acceptedEvents.where((e) => e.id != event.id).toList();
+
     if (response == InviteStatus.accepted) {
       _acceptedEvents = [
         OpenJioEvent(

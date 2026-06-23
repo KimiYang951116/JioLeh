@@ -75,6 +75,29 @@ class _InvitationsPageState extends State<InvitationsPage> {
       );
     }
   }
+
+  Future<void> _confirmLeave(OpenJioEvent event) async {
+  final shouldLeave = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Leave this jio?'),
+      content: const Text('You will leave this accepted jio.'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: const Text('Leave'),
+        ),
+      ],
+    ),
+  );
+
+  if (shouldLeave != true || !mounted) return;
+  await _respond(event, InviteStatus.declined);
+}
     
   
 
@@ -162,8 +185,12 @@ class _InvitationsPageState extends State<InvitationsPage> {
           if (_model.acceptedEvents.isEmpty)
             const _EmptyHint('No accepted jios yet')
           else
-            ..._model.acceptedEvents
-                .map((e) => AcceptedEventCard(event: e)),
+            ..._model.acceptedEvents.map(
+            (e) => AcceptedEventCard(
+              event: e,
+              onLeave: () => _confirmLeave(e),
+            ),
+          ),
         ],
         const SizedBox(height: 16),
       ],
