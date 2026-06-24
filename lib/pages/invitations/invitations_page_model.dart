@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:jio_leh/models/open_jio_event.dart';
 import 'package:jio_leh/services/auth_service.dart';
@@ -40,7 +39,7 @@ class InvitationsPageModel extends ChangeNotifier {
   bool get receivedExpanded => _receivedExpanded;
   bool get acceptedExpanded => _acceptedExpanded;
 
-  RealtimeChannel? _channel;
+  void Function()? _unsubscribe;
 
   void start() {
     loadEvents();
@@ -136,13 +135,13 @@ class InvitationsPageModel extends ChangeNotifier {
 
   void _subscribeToInvites() {
     final userId = auth.getCurrentUserId();
-    _channel = openJio.subscribeToInvites(userId, loadEvents);
+    _unsubscribe = openJio.subscribeToInvites(userId, loadEvents);
   }
 
   @override
   void dispose() {
     _disposed = true;
-    _channel?.unsubscribe();
+    _unsubscribe?.call();
     super.dispose();
   }
 }
