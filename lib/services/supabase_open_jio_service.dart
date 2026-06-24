@@ -22,7 +22,6 @@ class SupabaseOpenJioService extends OpenJioService {
         .from('open_jio_events')
         .insert({
           'user_id': senderId,
-          'invited_friend_ids': friendIds,
           'date_time': event.dateTime.toIso8601String(),
           'caption': event.caption,
           'location_name': event.locationName,
@@ -57,14 +56,34 @@ class SupabaseOpenJioService extends OpenJioService {
     String userId,
     List<UserFriend> allFriends,
   ) async {
-    final rows = await _client
+    final eventRows = await _client
         .from('open_jio_events')
         .select()
         .eq('user_id', userId)
         .order('created_at', ascending: false);
 
-      return rows.map((row) {
-      final ids = List<String>.from(row['invited_friend_ids'] as List);
+    if (eventRows.isEmpty) return [];
+
+    // Invitees now live only in the status table, so fetch them per event.
+    final eventIds = eventRows.map((r) => r['id'] as String).toList();
+    final statusRows = await _client
+        .from('open_jio_invite_statuses')
+        .select('event_id, invitee_id')
+        .inFilter('event_id', eventIds);
+
+    // Group invitee ids under their event.
+    final inviteeIdsByEvent = <String, List<String>>{};
+    for (final s in statusRows) {
+      final eventId = s['event_id'] as String;
+      final inviteeId = s['invitee_id'] as String;
+      if (!inviteeIdsByEvent.containsKey(eventId)) {
+        inviteeIdsByEvent[eventId] = [];
+      }
+      inviteeIdsByEvent[eventId]!.add(inviteeId);
+    }
+
+    return eventRows.map((row) {
+      final ids = inviteeIdsByEvent[row['id'] as String] ?? const <String>[];
       return OpenJioEvent(
         id: row['id'] as String,
         invitedFriends:
@@ -78,41 +97,40 @@ class SupabaseOpenJioService extends OpenJioService {
 
   @override
   Future<List<OpenJioEvent>> getReceivedEvents(String userId) async {
+    // Which events am I invited to? Ask the status table — my own rows are the source of truth.
+    final myStatuses = await _client
+        .from('open_jio_invite_statuses')
+        .select('event_id, status')
+        .eq('invitee_id', userId);
+
+    if (myStatuses.isEmpty) return [];
+
+    final eventIds = myStatuses.map((r) => r['event_id'] as String).toList();
+    // Build a lookup of my status for each event.
+    final statusByEvent = <String, String>{};
+    for (final s in myStatuses) {
+      statusByEvent[s['event_id'] as String] = s['status'] as String;
+    }
+
+    // Fetch those events (RLS allows it via the new EXISTS-over-statuses policy) and their senders.
     final eventRows = await _client
         .from('open_jio_events')
         .select()
-        .filter('invited_friend_ids', 'cs', '{$userId}')
+        .inFilter('id', eventIds)
         .order('created_at', ascending: false);
 
-    if (eventRows.isEmpty) return [];
-
-    final eventIds = eventRows.map((r) => r['id'] as String).toList();
     final senderIds =
         eventRows.map((r) => r['user_id'] as String).toSet().toList();
+    final profileRows = await _client
+        .from('profiles')
+        .select('id, display_name')
+        .inFilter('id', senderIds);
 
-    final results = await Future.wait([
-      _client
-          .from('open_jio_invite_statuses')
-          .select()
-          .eq('invitee_id', userId)
-          .inFilter('event_id', eventIds),
-      _client
-          .from('profiles')
-          .select('id, display_name')
-          .inFilter('id', senderIds),
-    ]);
-
-    final statusRows = results[0] as List<dynamic>;
-    final profileRows = results[1] as List<dynamic>;
-
-    final statusByEvent = {
-      for (final s in statusRows)
-        s['event_id'] as String: s['status'] as String
-    };
-    final nameById = {
-      for (final p in profileRows)
-        p['id'] as String: p['display_name'] as String,
-    };
+    // Build a lookup of sender name by id.
+    final nameById = <String, String>{};
+    for (final p in profileRows) {
+      nameById[p['id'] as String] = p['display_name'] as String;
+    }
 
     return eventRows.map((row) {
       final eventId = row['id'] as String;
