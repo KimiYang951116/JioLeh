@@ -7,11 +7,13 @@ class FriendSelectionList extends StatelessWidget {
     required this.friends,
     required this.selectedFriendIds,
     required this.onToggle,
+    this.readOnly = false,
   });
 
   final List<UserFriend> friends;
   final Set<String> selectedFriendIds;
   final void Function(UserFriend) onToggle;
+  final bool readOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -25,12 +27,12 @@ class FriendSelectionList extends StatelessWidget {
         final isSelected = selectedFriendIds.contains(friend.userProfile.id);
 
         return ListTile(
-          onTap: () => onToggle(friend),
+          onTap: readOnly ? null : () => onToggle(friend),
           title: Text(friend.userProfile.displayName),
           subtitle: Text('@${friend.userProfile.username}'),
           trailing: IconButton(
             tooltip: isSelected ? 'Remove from OpenJio' : 'Add to OpenJio',
-            onPressed: () => onToggle(friend),
+            onPressed: readOnly ? null : () => onToggle(friend),
             icon: Icon(
               isSelected
                   ? Icons.radio_button_checked
