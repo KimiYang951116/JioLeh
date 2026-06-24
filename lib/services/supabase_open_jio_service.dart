@@ -17,6 +17,7 @@ class SupabaseOpenJioService extends OpenJioService {
         .map((friend) => friend.userProfile.id)
         .toList();
 
+    // Insert the event first. This is the "anchor" row the invites depend on.
     final row = await _client
         .from('open_jio_events')
         .insert({
@@ -28,20 +29,27 @@ class SupabaseOpenJioService extends OpenJioService {
         })
         .select()
         .single();
-
     final eventId = row['id'] as String;
 
-    await _client.from('open_jio_invite_statuses').insert(
-          friendIds
-              .map((id) => {
-                    'event_id': eventId,
-                    'invitee_id': id,
-                    'status': InviteStatus.pending.name,
-                  })
-              .toList(),
-        );
+    try {
+      // Add a pending status row per invitee. If this throws, the event above is already saved.
+      await _client.from('open_jio_invite_statuses').insert(
+            friendIds
+                .map((id) => {
+                      'event_id': eventId,
+                      'invitee_id': id,
+                      'status': InviteStatus.pending.name,
+                    })
+                .toList(),
+          );
 
-    return eventId;
+      return eventId;
+    } catch (_) {
+      // Compensating delete: undo the orphaned event (ON DELETE CASCADE clears any partial status rows too).
+      await _client.from('open_jio_events').delete().eq('id', eventId);
+      // rethrow so the caller learns the save failed instead of seeing a phantom success.
+      rethrow;
+    }
   }
 
   @override
