@@ -22,9 +22,7 @@ class InvitationsPageModel extends ChangeNotifier {
   List<OpenJioEvent> _acceptedEvents = [];
   bool _isLoading = true;
   String? _error;
-  bool _sentExpanded = true;
-  bool _receivedExpanded = true;
-  bool _acceptedExpanded = true;
+  int _selectedTab = 0;
   bool _disposed = false;
 
   List<OpenJioEvent> get sentEvents => _sentEvents;
@@ -32,9 +30,7 @@ class InvitationsPageModel extends ChangeNotifier {
   List<OpenJioEvent> get acceptedEvents => _acceptedEvents;
   bool get isLoading => _isLoading;
   String? get error => _error;
-  bool get sentExpanded => _sentExpanded;
-  bool get receivedExpanded => _receivedExpanded;
-  bool get acceptedExpanded => _acceptedExpanded;
+  int get selectedTab => _selectedTab;
 
   void Function()? _unsubscribe;
 
@@ -118,12 +114,8 @@ class InvitationsPageModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void toggleSent() => _toggle(() => _sentExpanded = !_sentExpanded);
-  void toggleReceived() => _toggle(() => _receivedExpanded = !_receivedExpanded);
-  void toggleAccepted() => _toggle(() => _acceptedExpanded = !_acceptedExpanded);
-
-  void _toggle(void Function() update) {
-    update();
+  void selectTab(int index) {
+    _selectedTab = index;
     notifyListeners();
   }
 

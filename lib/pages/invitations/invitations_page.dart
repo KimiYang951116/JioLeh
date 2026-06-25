@@ -9,6 +9,11 @@ import 'package:jio_leh/pages/invitations/widgets/accepted_event_card.dart';
 import 'package:jio_leh/pages/invitations/widgets/received_event_card.dart';
 import 'package:jio_leh/pages/invitations/widgets/sent_event_card.dart';
 
+import 'package:jio_leh/theme.dart';
+import 'package:jio_leh/widgets/app_page_header.dart';
+import 'package:jio_leh/widgets/app_primary_button.dart';
+import 'package:jio_leh/widgets/app_selection_bar.dart';
+
 class InvitationsPage extends StatefulWidget {
   const InvitationsPage({super.key});
 
@@ -103,25 +108,43 @@ class _InvitationsPageState extends State<InvitationsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Invitations'),
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _openJioForm,
-                child: const Text('Open a Jio'),
+      backgroundColor: AppColors.lightBackground,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const AppPageHeader(title: 'OpenJios', closeBtn: false),
+                  const SizedBox(height: 12),
+                  AppPrimaryButton(
+                    icon: Icons.add,
+                    label: 'Open a Jio',
+                    onPressed: _openJioForm,
+                    backgroundColor: Colors.black,
+                  ),
+                  const SizedBox(height: 16),
+                  AppSelectionBar(
+                    items: [
+                      const AppSelectionItem(label: 'Your Jios'),
+                      AppSelectionItem(
+                        label: 'Received',
+                        badgeCount: _model.pendingEvents.length,
+                      ),
+                    ],
+                    selectedIndex: _model.selectedTab,
+                    onChanged: _model.selectTab,
+                  ),
+                ],
               ),
             ),
-          ),
-          const Divider(height: 1),
-          Expanded(
-            child: _buildBody()),
-            ],
+            const SizedBox(height: 12),
+            Expanded(child: _buildBody()),
+          ],
+        ),
       ),
     );
   }
@@ -142,117 +165,38 @@ class _InvitationsPageState extends State<InvitationsPage> {
         ),
       );
     }
-    return ListView(
-      children: [
-        _SectionHeader(
-          title: 'Sent',
-          count: _model.sentEvents.length,
-          expanded: _model.sentExpanded,
-          onTap: _model.toggleSent,
-        ),
-        if (_model.sentExpanded) ...[
-          if (_model.sentEvents.isEmpty)
-            const _EmptyHint('No sent jios yet')
-          else
-            ..._model.sentEvents.map((e) => SentEventCard(event: e)),
-        ],
-        _SectionHeader(
-          title: 'Received',
-          count: _model.pendingEvents.length,
-          expanded: _model.receivedExpanded,
-          onTap: _model.toggleReceived,
-        ),
-        if (_model.receivedExpanded) ...[
-          if (_model.pendingEvents.isEmpty)
-            const _EmptyHint('No pending invites')
-          else
-            ..._model.pendingEvents.map(
-              (e) => ReceivedEventCard(
-                event: e,
-                onAccept: () => _respond(e, InviteStatus.accepted),
-                onDecline: () => _respond(e, InviteStatus.declined),
-              ),
-            ),
-        ],
-        _SectionHeader(
-          title: 'Accepted',
-          count: _model.acceptedEvents.length,
-          expanded: _model.acceptedExpanded,
-          onTap: _model.toggleAccepted,
-        ),
-        if (_model.acceptedExpanded) ...[
-          if (_model.acceptedEvents.isEmpty)
-            const _EmptyHint('No accepted jios yet')
-          else
-            ..._model.acceptedEvents.map(
+    final tab = _model.selectedTab;
+
+    if (tab == 0) {
+      final hasJios =
+          _model.sentEvents.isNotEmpty || _model.acceptedEvents.isNotEmpty;
+      if (!hasJios) {
+        return const Center(child: Text('No jios yet'));
+      }
+      return ListView(
+        children: [
+          ..._model.sentEvents.map((e) => SentEventCard(event: e)),
+          ..._model.acceptedEvents.map(
             (e) => AcceptedEventCard(
               event: e,
               onLeave: () => _confirmLeave(e),
             ),
           ),
         ],
-        const SizedBox(height: 16),
-      ],
-    );
-  }
-}
+      );
+    }
 
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({
-    required this.title,
-    required this.count,
-    required this.expanded,
-    required this.onTap,
-  });
-
-  final String title;
-  final int count;
-  final bool expanded;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            Text(title,
-                style: const TextStyle(
-                    fontWeight: FontWeight.bold, fontSize: 15)),
-            if (count > 0) ...[
-              const SizedBox(width: 8),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text('$count',
-                    style: const TextStyle(
-                        color: Colors.white, fontSize: 12)),
-              ),
-            ],
-            const Spacer(),
-            Icon(expanded ? Icons.expand_less : Icons.expand_more),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _EmptyHint extends StatelessWidget {
-  const _EmptyHint(this.message);
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-      child: Text(message, style: const TextStyle(color: Colors.grey)),
+    if (_model.pendingEvents.isEmpty) {
+      return const Center(child: Text('No pending invites'));
+    }
+    return ListView(
+      children: _model.pendingEvents
+          .map((e) => ReceivedEventCard(
+                event: e,
+                onAccept: () => _respond(e, InviteStatus.accepted),
+                onDecline: () => _respond(e, InviteStatus.declined),
+              ))
+          .toList(),
     );
   }
 }
