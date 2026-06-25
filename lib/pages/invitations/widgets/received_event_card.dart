@@ -32,7 +32,18 @@ class ReceivedEventCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Created by ${event.senderName ?? 'Someone'}'),
-            Text('${event.locationName} · ${formatDateTime(event.dateTime)}'),
+            Row(
+              children: [
+                const Icon(
+                  Icons.location_on_outlined,
+                  size: 16,
+                  color: AppColors.lightSubtitle,
+                ),
+                const SizedBox(width: 4),
+                Expanded(child: Text(event.locationName)),
+              ],
+            ),
+            Text(formatDateTime(event.dateTime)),
           ],
         ),
         isThreeLine: true,
