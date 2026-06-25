@@ -7,12 +7,14 @@ class FakeOpenJioService extends OpenJioService {
     this.sentEvents = const [],
     this.receivedEvents = const [],
     this.savedEventId = "fake-event-id",
+    this.throwInviteNotFound = false,
   });
 
   // Defaults live in the constructor, so each test sets only what it cares about.
   List<OpenJioEvent> sentEvents;
   List<OpenJioEvent> receivedEvents;
   String savedEventId;
+  bool throwInviteNotFound;
 
   int saveEventCalls = 0;
   int respondToInviteCalls = 0;
@@ -43,6 +45,9 @@ class FakeOpenJioService extends OpenJioService {
   ) async {
     respondToInviteCalls++;
     lastResponse = status;
+    if (throwInviteNotFound) {
+      throw const InviteNotFound();
+    }
   }
 
   @override

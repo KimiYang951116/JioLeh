@@ -156,14 +156,19 @@ class SupabaseOpenJioService extends OpenJioService {
     String userId,
     InviteStatus status,
   ) async {
-    await _client
+    final updated = await _client
         .from('open_jio_invite_statuses')
         .update({
           'status': status.name,
           'updated_at': DateTime.now().toIso8601String(),
         })
         .eq('event_id', eventId)
-        .eq('invitee_id', userId);
+        .eq('invitee_id', userId)
+        .select();
+
+    if (updated.isEmpty) {
+      throw const InviteNotFound();
+    }
   }
 
   @override

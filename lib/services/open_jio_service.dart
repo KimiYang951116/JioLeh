@@ -31,3 +31,16 @@ abstract class OpenJioService {
   /// Returns a function that cancels the subscription when invoked.
   void Function() subscribeToInvites(String userId, void Function() onNew);
 }
+
+/// Base class for all Open Jio related exceptions.
+class OpenJioException implements Exception {
+  final String message;
+  const OpenJioException(this.message);
+  @override
+  String toString() => message;
+}
+
+/// Thrown when there is no matching invite to respond to (missing row or not the user's).
+class InviteNotFound extends OpenJioException {
+  const InviteNotFound() : super('No matching invite to respond to.');
+}
