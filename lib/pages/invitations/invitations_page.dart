@@ -10,6 +10,7 @@ import 'package:jio_leh/pages/invitations/widgets/received_event_card.dart';
 import 'package:jio_leh/pages/invitations/widgets/sent_event_card.dart';
 
 import 'package:jio_leh/theme.dart';
+import 'package:jio_leh/widgets/app_dialog.dart';
 import 'package:jio_leh/widgets/app_page_header.dart';
 import 'package:jio_leh/widgets/app_primary_button.dart';
 import 'package:jio_leh/widgets/app_selection_bar.dart';
@@ -81,27 +82,17 @@ class _InvitationsPageState extends State<InvitationsPage> {
   }
 
   Future<void> _confirmLeave(OpenJioEvent event) async {
-  final shouldLeave = await showDialog<bool>(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Leave this jio?'),
-      content: const Text('You will leave this accepted jio.'),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, false),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.pop(context, true),
-          child: const Text('Leave'),
-        ),
-      ],
-    ),
-  );
+    final shouldLeave = await showAppConfirmDialog(
+      context: context,
+      title: 'Leave this jio?',
+      message: 'You will leave this accepted jio.',
+      confirmLabel: 'Leave',
+      isDestructive: true,
+    );
 
-  if (shouldLeave != true || !mounted) return;
-  await _respond(event, InviteStatus.declined);
-}
+    if (!shouldLeave || !mounted) return;
+    await _respond(event, InviteStatus.declined);
+  }
     
   
 
