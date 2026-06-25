@@ -100,7 +100,7 @@ class _InvitationsPageState extends State<InvitationsPage> {
                     onPressed: _openJioForm,
                     backgroundColor: Colors.black,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
                   AppSelectionBar(
                     items: [
                       const AppSelectionItem(label: 'Your Jios'),
@@ -115,7 +115,7 @@ class _InvitationsPageState extends State<InvitationsPage> {
                 ],
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Expanded(child: _buildBody()),
           ],
         ),
