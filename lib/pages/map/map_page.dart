@@ -29,7 +29,7 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-  late final PinService _locationServicePins;
+  late final PinService _pinService;
   late final GeocodingService _geocoding;
   late final LocationService _locationService;
   bool _didInit = false;
@@ -57,7 +57,7 @@ class _MapPageState extends State<MapPage> {
     _didInit = true;
 
     final services = ServiceProvider.of(context)!;
-    _locationServicePins = services.pins;
+    _pinService = services.pins;
     _geocoding = services.geocoding;
     _locationService = services.location;
     _booting();
@@ -200,7 +200,7 @@ class _MapPageState extends State<MapPage> {
     );
 
     try {
-      final photoUrls = await _locationServicePins.createPhotoUrls(
+      final photoUrls = await _pinService.createPhotoUrls(
         pin?.photoPaths ?? const [],
       );
 
@@ -238,7 +238,7 @@ class _MapPageState extends State<MapPage> {
     final position = _currentPosition;
     if (position == null) return;
 
-    final places = await _locationServicePins.loadPlacesNearLocation(
+    final places = await _pinService.loadPlacesNearLocation(
       latitude: position.latitude,
       longitude: position.longitude,
     );
@@ -258,7 +258,7 @@ class _MapPageState extends State<MapPage> {
       context,
       PinType.restaurant,
       onSave: (customization) async {
-        await _locationServicePins.saveUserInsertedPin(
+        await _pinService.saveUserInsertedPin(
           UserInsertedPin(
             latitude: position.latitude,
             longitude: position.longitude,

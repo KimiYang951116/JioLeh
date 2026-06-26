@@ -1,6 +1,7 @@
 import 'auth_service.dart';
 import 'supabase_auth_service.dart';
 import 'pin_service.dart';
+import 'supabase_pin_service.dart';
 import 'location_service.dart';
 import 'geocoding_service.dart';
 import 'account_service.dart';
@@ -25,7 +26,10 @@ class Services {
   // of the app never mentions Supabase.
   static final AuthService auth = SupabaseAuthService(client: _client);
 
-  static final pins = PinService(client: _client, auth: auth);
+  static final PinService pins = SupabasePinService(
+    client: _client,
+    auth: auth,
+  );
   static final location = LocationService();
   static final geocoding = GeocodingService();
   static final OpenJioService openJio = SupabaseOpenJioService(
@@ -33,8 +37,8 @@ class Services {
     auth: auth,
   );
   static final JioChatService jioChat = SupabaseJioChatService(
-  client: _client,
-  auth: auth,
+    client: _client,
+    auth: auth,
   );
 
   static final AccountService account = SupabaseAccountService(
@@ -45,5 +49,4 @@ class Services {
     client: _client,
     auth: auth,
   );
-
 }
