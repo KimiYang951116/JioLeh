@@ -98,7 +98,7 @@ class _MapPageState extends State<MapPage> {
         locationPuck: LocationPuck(
           locationPuck3D: LocationPuck3D(
             modelUri: "asset://assets/models/Adventurer_static.glb",
-            modelScale: [12,12,12]
+            modelScale: [25,25,25]
           )
         )
       ), // the ring/puck rotates when the user rotates (changes wrt bearing)
