@@ -170,8 +170,8 @@ class _ProfilePageState extends State<ProfilePage> {
           const SizedBox(height: 16),
           if (_model.isOwnProfile)
             AppPrimaryButton(
-              backgroundColor: Colors.grey,
-              liftColor: Colors.blueGrey,
+              backgroundColor: AppColors.danger,
+              liftColor: AppColors.dangerShadow,
               label: 'Log out',
               onPressed: _model.signOut,
             ),
