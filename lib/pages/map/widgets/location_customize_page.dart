@@ -3,6 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:jio_leh/pages/map/models/pin_type.dart';
+import 'package:jio_leh/widgets/app_page_header.dart';
+import 'package:jio_leh/widgets/app_section_label.dart';
+import 'package:jio_leh/widgets/app_text_field.dart';
+
+import 'package:jio_leh/theme.dart';
 
 class LocationCustomization {
   final PinType pinType;
@@ -212,13 +217,7 @@ class _LocationCustomizePageState extends State<LocationCustomizePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.isReadOnly
-              ? '${_currentType.emoji} Location details'
-              : '${_currentType.emoji} Customise location',
-        ),
-      ),
+      backgroundColor: AppColors.lightBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
@@ -226,6 +225,12 @@ class _LocationCustomizePageState extends State<LocationCustomizePage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
             children: [
+              AppPageHeader(
+                title: widget.isReadOnly
+                    ? 'Location details'
+                    : 'Customise location',
+              ),
+              const SizedBox(height: 16),
               if (!widget.isReadOnly) ...[
                 const Text(
                   'Location type',
@@ -253,29 +258,22 @@ class _LocationCustomizePageState extends State<LocationCustomizePage> {
                 const SizedBox(height: 20),
               ],
 
-              TextField(
+              const AppSectionLabel(text: 'Formal location name'),
+              const SizedBox(height: 8),
+              AppTextField(
                 controller: _formalNameController,
+                hintText: 'Example: Springleaf Prata Place',
                 readOnly: widget.isReadOnly,
-                autofocus: !widget.isReadOnly,
-                textInputAction: TextInputAction.next,
-                decoration: const InputDecoration(
-                  labelText: 'Formal location name',
-                  hintText: 'Example: Springleaf Prata Place',
-                  border: OutlineInputBorder(),
-                ),
               ),
 
               const SizedBox(height: 12),
 
-              TextField(
+              const AppSectionLabel(text: 'Your name for it'),
+              const SizedBox(height: 8),
+              AppTextField(
                 controller: _nameController,
+                hintText: 'Example: My favourite prata place',
                 readOnly: widget.isReadOnly,
-                textInputAction: TextInputAction.done,
-                decoration: const InputDecoration(
-                  labelText: 'Your name for it',
-                  hintText: 'Example: My favourite prata place',
-                  border: OutlineInputBorder(),
-                ),
               ),
 
               const SizedBox(height: 20),
@@ -347,19 +345,14 @@ class _LocationCustomizePageState extends State<LocationCustomizePage> {
 
               const SizedBox(height: 20),
 
-              TextField(
+              const AppSectionLabel(text: 'Review'),
+              const SizedBox(height: 8),
+              AppTextField(
                 controller: _reviewController,
+                hintText: 'What did you think about this place?',
                 readOnly: widget.isReadOnly,
-                minLines: 3,
+                height: 120,
                 maxLines: 5,
-                maxLength: 500,
-                textCapitalization: TextCapitalization.sentences,
-                decoration: const InputDecoration(
-                  labelText: 'Review',
-                  hintText: 'What did you think about this place?',
-                  alignLabelWithHint: true,
-                  border: OutlineInputBorder(),
-                ),
               ),
 
               const SizedBox(height: 20),
