@@ -11,7 +11,7 @@ import 'package:jio_leh/models/user_pin.dart';
 import 'package:jio_leh/pages/map/widgets/location_permission_dialog.dart';
 import 'package:jio_leh/pages/map/widgets/current_area_bar.dart';
 import 'package:jio_leh/pages/map/widgets/map_toolbar.dart';
-import 'package:jio_leh/pages/map/widgets/location_customize_sheet.dart';
+import 'package:jio_leh/pages/map/widgets/location_customize_page.dart';
 
 import 'package:jio_leh/pages/map/renders/map_pins.dart';
 
@@ -206,7 +206,7 @@ class _MapPageState extends State<MapPage> {
 
       if (!mounted) return;
 
-      await showLocationCustomizeSheet(
+      await showLocationCustomizePage(
         context,
         pinType,
         initialCustomization: LocationCustomization(
@@ -254,7 +254,7 @@ class _MapPageState extends State<MapPage> {
 
     if (position == null) return; // stops if location unknown
 
-    await showLocationCustomizeSheet(
+    await showLocationCustomizePage(
       context,
       PinType.restaurant,
       onSave: (customization) async {
