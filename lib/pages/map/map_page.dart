@@ -95,6 +95,12 @@ class _MapPageState extends State<MapPage> {
         pulsingEnabled: true, // pulsing animation ard user loc
         showAccuracyRing: true, // show GPS accuracy area
         puckBearingEnabled: true,
+        locationPuck: LocationPuck(
+          locationPuck3D: LocationPuck3D(
+            modelUri: "asset://assets/models/Adventurer_static.glb",
+            modelScale: [12,12,12]
+          )
+        )
       ), // the ring/puck rotates when the user rotates (changes wrt bearing)
     );
   }
