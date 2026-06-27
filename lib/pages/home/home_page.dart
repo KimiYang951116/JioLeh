@@ -7,7 +7,7 @@ import 'package:jio_leh/pages/invitations/invitations_page.dart';
 import 'package:jio_leh/pages/friends/friends_page.dart';
 import 'package:jio_leh/pages/profile/profile_page.dart';
 import 'package:jio_leh/pages/map/models/pin_type.dart';
-import 'package:jio_leh/pages/map/widgets/location_customize_sheet.dart';
+import 'package:jio_leh/pages/map/widgets/location_customize_page.dart';
 
 // The signed-in home: four tabbed pages behind a bottom nav, plus the center
 // "+" that opens the create-a-location sheet.
@@ -40,7 +40,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _openCreatePin() async {
     // UI-only for now: opens the form sheet without an onSave handler, so nothing is persisted. 
     // TODO: wire up saving (GPS coords + Services.pins).
-    await showLocationCustomizeSheet(context, PinType.restaurant);
+    await showLocationCustomizePage(context, PinType.restaurant);
   }
 
   @override
