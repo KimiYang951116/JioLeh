@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:jio_leh/pages/map/models/pin_type.dart';
 import 'package:jio_leh/widgets/app_page_header.dart';
 import 'package:jio_leh/widgets/app_section_label.dart';
+import 'package:jio_leh/widgets/app_selection_bar.dart';
 import 'package:jio_leh/widgets/app_text_field.dart';
 
 import 'package:jio_leh/theme.dart';
@@ -237,23 +238,20 @@ class _LocationCustomizePageState extends State<LocationCustomizePage> {
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
+                AppSelectionBar(
+                  items: [
                     for (final option in PinType.values)
-                      ChoiceChip(
-                        label: Text('${option.emoji} ${option.label}'),
-                        selected: _currentType == option,
-                        onSelected: _isSaving
-                            ? null
-                            : (_) {
-                                setState(() {
-                                  _currentType = option;
-                                });
-                              },
+                      AppSelectionItem(
+                        label: '${option.emoji} ${option.label}',
                       ),
                   ],
+                  selectedIndex: PinType.values.indexOf(_currentType),
+                  onChanged: (index) {
+                    if (_isSaving) return;
+                    setState(() {
+                      _currentType = PinType.values[index];
+                    });
+                  },
                 ),
                 const SizedBox(height: 20),
               ],
@@ -315,32 +313,18 @@ class _LocationCustomizePageState extends State<LocationCustomizePage> {
 
               const SizedBox(height: 8),
 
-              Wrap(
-                spacing: 8,
-                children: [
-                  ChoiceChip(
-                    label: const Text('Friends'),
-                    selected: _isPrivate == false,
-                    onSelected: widget.isReadOnly || _isSaving
-                        ? null
-                        : (_) {
-                            setState(() {
-                              _isPrivate = false;
-                            });
-                          },
-                  ),
-                  ChoiceChip(
-                    label: const Text('Private'),
-                    selected: _isPrivate == true,
-                    onSelected: widget.isReadOnly || _isSaving
-                        ? null
-                        : (_) {
-                            setState(() {
-                              _isPrivate = true;
-                            });
-                          },
-                  ),
+              AppSelectionBar(
+                items: const [
+                  AppSelectionItem(label: 'Friends'),
+                  AppSelectionItem(label: 'Private'),
                 ],
+                selectedIndex: _isPrivate == null ? -1 : (_isPrivate! ? 1 : 0),
+                onChanged: (index) {
+                  if (widget.isReadOnly || _isSaving) return;
+                  setState(() {
+                    _isPrivate = index == 1;
+                  });
+                },
               ),
 
               const SizedBox(height: 20),
