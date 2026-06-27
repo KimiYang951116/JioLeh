@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jio_leh/services/location_service.dart';
+import 'package:jio_leh/widgets/app_dialog.dart';
 
 String _locationErrorMessage(Object? error) {
   if (error is LocationServiceOff) {
@@ -20,41 +21,28 @@ Future<void> showLocationErrorDialog({
   required LocationService locationService,
   required VoidCallback onRetry,
 }) async {
-  await showDialog<void>(
+  await showAppDialog<void>(
     context: context,
-    builder: (dialogContext) => AlertDialog(
-      icon: const Icon(Icons.location_off, size: 40, color: Colors.grey),
-      title: const Text('Location unavailable'),
-      content: Text(_locationErrorMessage(error)),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(dialogContext).pop(),
-          child: const Text('Cancel'),
+    icon: Icons.location_off,
+    title: 'Location unavailable',
+    message: _locationErrorMessage(error),
+    actions: [
+      const AppDialogAction(label: 'Cancel'),
+      if (error is LocationServiceOff)
+        AppDialogAction(
+          label: 'Open location settings',
+          onPressed: locationService.openLocationSettings,
         ),
-        if (error is LocationServiceOff)
-          TextButton(
-            onPressed: () {
-              Navigator.of(dialogContext).pop();
-              locationService.openLocationSettings();
-            },
-            child: const Text('Open location settings'),
-          ),
-        if (error is LocationBlocked)
-          TextButton(
-            onPressed: () {
-              Navigator.of(dialogContext).pop();
-              locationService.openAppSettings();
-            },
-            child: const Text('Open app settings'),
-          ),
-        FilledButton(
-          onPressed: () {
-            Navigator.of(dialogContext).pop();
-            onRetry();
-          },
-          child: const Text('Retry'),
+      if (error is LocationBlocked)
+        AppDialogAction(
+          label: 'Open app settings',
+          onPressed: locationService.openAppSettings,
         ),
-      ],
-    ),
+      AppDialogAction(
+        label: 'Retry',
+        isPrimary: true,
+        onPressed: onRetry,
+      ),
+    ],
   );
 }

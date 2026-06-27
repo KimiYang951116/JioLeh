@@ -76,6 +76,9 @@ flutter:
   assets:
     - assets/google_logo.png
     - assets/logo.png
+    - assets/models/Adventurer.glb
+    - assets/models/Adventurer_static.glb
+    - assets/models/Duck.glb
 
   # To add assets to your application, add an assets section, like this:
   # assets:
