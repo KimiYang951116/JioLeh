@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:jio_leh/theme.dart';
 
 class BrandLoadingAnimation extends StatefulWidget {
-  const BrandLoadingAnimation({super.key, this.width = 170});
+  const BrandLoadingAnimation({super.key, this.width = 170}) : compact = false;
+
+  const BrandLoadingAnimation.compact({super.key, this.width = 40}) : compact = true;
 
   final double width;
+  final bool compact;
 
   @override
   State<BrandLoadingAnimation> createState() => _BrandLoadingAnimationState();
@@ -25,7 +28,7 @@ class _BrandLoadingAnimationState extends State<BrandLoadingAnimation>
     );
     _intro = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
+      duration: Duration(milliseconds: widget.compact ? 450 : 1500),
     )
       ..addStatusListener((status) {
         if (status == AnimationStatus.completed) _idle.repeat(reverse: true);
@@ -42,15 +45,17 @@ class _BrandLoadingAnimationState extends State<BrandLoadingAnimation>
 
   @override
   Widget build(BuildContext context) {
+    final box = widget.compact ? _BrandPainter.pinViewBox : _BrandPainter.viewBox;
     return AnimatedBuilder(
       animation: Listenable.merge([_intro, _idle]),
       builder: (context, _) {
         return CustomPaint(
-          size: Size(
-            widget.width,
-            widget.width * _BrandPainter.viewBox.height / _BrandPainter.viewBox.width,
+          size: Size(widget.width, widget.width * box.height / box.width),
+          painter: _BrandPainter(
+            intro: _intro.value,
+            idle: _idle.value,
+            compact: widget.compact,
           ),
-          painter: _BrandPainter(intro: _intro.value, idle: _idle.value),
         );
       },
     );
@@ -58,12 +63,14 @@ class _BrandLoadingAnimationState extends State<BrandLoadingAnimation>
 }
 
 class _BrandPainter extends CustomPainter {
-  _BrandPainter({required this.intro, required this.idle});
+  _BrandPainter({required this.intro, required this.idle, required this.compact});
 
   final double intro;
   final double idle;
+  final bool compact;
 
   static const viewBox = Rect.fromLTWH(190, 110, 425, 560);
+  static const pinViewBox = Rect.fromLTWH(268, 112, 281, 399);
   static const _pinCenter = Offset(408.5, 311.5);
 
   static double _local(double value, double start, double end) {
@@ -74,10 +81,11 @@ class _BrandPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final scale = size.width / viewBox.width;
+    final box = compact ? pinViewBox : viewBox;
+    final scale = size.width / box.width;
     canvas.save();
     canvas.scale(scale);
-    canvas.translate(-viewBox.left, -viewBox.top);
+    canvas.translate(-box.left, -box.top);
 
     final breathe = 1 + 0.025 * idle;
     canvas.save();
@@ -87,11 +95,28 @@ class _BrandPainter extends CustomPainter {
     _paintPin(canvas);
     canvas.restore();
 
-    _paintWordmark(canvas);
+    if (!compact) _paintWordmark(canvas);
     canvas.restore();
   }
 
   void _paintPin(Canvas canvas) {
+    if (compact) {
+      final popT = Curves.elasticOut.transform(_local(intro, 0.0, 1.0));
+      final fillT = _local(intro, 0.0, 0.4);
+      if (fillT > 0) {
+        canvas.save();
+        canvas.translate(_pinCenter.dx, _pinCenter.dy);
+        canvas.scale(0.8 + 0.2 * popT);
+        canvas.translate(-_pinCenter.dx, -_pinCenter.dy);
+        canvas.drawPath(
+          _pinFill,
+          Paint()..color = LogoColors.forestLogo.withValues(alpha: fillT),
+        );
+        canvas.restore();
+      }
+      return;
+    }
+
     final traceT = Curves.easeOut.transform(_local(intro, 0.0, 0.5));
     final popT = Curves.elasticOut.transform(_local(intro, 0.42, 0.85));
     final fillT = _local(intro, 0.42, 0.6);
@@ -143,7 +168,9 @@ class _BrandPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _BrandPainter oldDelegate) =>
-      oldDelegate.intro != intro || oldDelegate.idle != idle;
+      oldDelegate.intro != intro ||
+      oldDelegate.idle != idle ||
+      oldDelegate.compact != compact;
 
   static final Path _pinOutline = Path()
     ..moveTo(413.516, 463.575)
