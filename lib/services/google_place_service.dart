@@ -8,8 +8,8 @@ import 'package:http/http.dart' as http;
 
 class GooglePlaceService extends PlaceService {
   GooglePlaceService({http.Client? httpClient})
-      : _httpClient = httpClient ?? http.Client();
-  
+    : _httpClient = httpClient ?? http.Client();
+
   final http.Client _httpClient;
 
   @override

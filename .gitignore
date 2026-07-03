@@ -50,3 +50,4 @@ gi_jios/build/
 # Local scripts (not committed)
 /scripts/
 /docs/superpowers/
+/.superpowers/

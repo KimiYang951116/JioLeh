@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import 'package:jio_leh/app/service_provider.dart';
+import 'package:jio_leh/models/nearby_place.dart';
 import 'package:jio_leh/pages/map/models/pin_type.dart';
 import 'package:jio_leh/widgets/app_page_header.dart';
 import 'package:jio_leh/widgets/app_primary_button.dart';
@@ -40,6 +42,8 @@ Future<LocationCustomization?> showLocationCustomizePage(
   PinType selectedType, {
   LocationCustomization? initialCustomization,
   bool isReadOnly = false,
+  double? latitude,
+  double? longitude,
   Future<void> Function(LocationCustomization customization)? onSave,
 }) {
   return Navigator.of(context).push<LocationCustomization>(
@@ -48,6 +52,8 @@ Future<LocationCustomization?> showLocationCustomizePage(
         selectedType: selectedType,
         initialCustomization: initialCustomization,
         isReadOnly: isReadOnly,
+        latitude: latitude,
+        longitude: longitude,
         onSave: onSave,
       ),
     ),
@@ -58,6 +64,8 @@ class LocationCustomizePage extends StatefulWidget {
   final PinType selectedType;
   final LocationCustomization? initialCustomization;
   final bool isReadOnly;
+  final double? latitude;
+  final double? longitude;
   final Future<void> Function(LocationCustomization customization)? onSave;
 
   const LocationCustomizePage({
@@ -65,6 +73,8 @@ class LocationCustomizePage extends StatefulWidget {
     required this.selectedType,
     this.initialCustomization,
     this.isReadOnly = false,
+    this.latitude,
+    this.longitude,
     this.onSave,
   });
 
@@ -80,6 +90,10 @@ class _LocationCustomizePageState extends State<LocationCustomizePage> {
   late int _rating;
   late bool? _isPrivate;
   var _isSaving = false;
+  bool _suggestionsFetched = false;
+  bool _loadingSuggestions = false;
+  List<NearbyPlace> _nearbyPlaces = const [];
+  bool _suggestionsDismissed = false;
 
   final _imagePicker = ImagePicker();
   final _selectedPhotos = <XFile>[];
@@ -99,6 +113,37 @@ class _LocationCustomizePageState extends State<LocationCustomizePage> {
     _currentType = widget.selectedType;
     _rating = initial?.rating ?? 0;
     _isPrivate = initial?.isPrivate;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _fetchNearbySuggestions();
+  }
+
+  Future<void> _fetchNearbySuggestions() async {
+    if (_suggestionsFetched || widget.isReadOnly) return;
+
+    final latitude = widget.latitude;
+    final longitude = widget.longitude;
+    if (latitude == null || longitude == null) return;
+
+    _suggestionsFetched = true;
+    setState(() {
+      _loadingSuggestions = true;
+    });
+
+    final places = await ServiceProvider.of(context)!.places.getNearbyPlaces(
+      latitude: latitude,
+      longitude: longitude,
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      _nearbyPlaces = places;
+      _loadingSuggestions = false;
+    });
   }
 
   @override

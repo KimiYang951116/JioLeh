@@ -26,6 +26,4 @@ class NearbyPlace {
       address: map['formattedAddress'] as String?,
     );
   }
-
-
 }
