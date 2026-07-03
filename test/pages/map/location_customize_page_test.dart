@@ -15,30 +15,8 @@ void main() {
     );
   }
 
-  group('LocationCustomizePage nearby-place fetch', () {
-    testWidgets('fetches nearby places using the given coordinates', (
-      tester,
-    ) async {
-      final places = FakePlaceService();
-
-      await tester.pumpWidget(
-        wrap(
-          const LocationCustomizePage(
-            selectedType: PinType.restaurant,
-            latitude: 1.35,
-            longitude: 103.82,
-          ),
-          places: places,
-        ),
-      );
-      await tester.pump();
-
-      expect(places.getNearbyPlacesCalls, 1);
-      expect(places.lastLatitude, 1.35);
-      expect(places.lastLongitude, 103.82);
-    });
-
-    testWidgets('does not fetch when read-only', (tester) async {
+  group('LocationCustomizePage Find nearby button', () {
+    testWidgets('does not render when read-only', (tester) async {
       final places = FakePlaceService();
 
       await tester.pumpWidget(
@@ -54,10 +32,10 @@ void main() {
       );
       await tester.pump();
 
-      expect(places.getNearbyPlacesCalls, 0);
+      expect(find.text('Find nearby'), findsNothing);
     });
 
-    testWidgets('does not fetch when coordinates are not provided', (
+    testWidgets('does not render when coordinates are not provided', (
       tester,
     ) async {
       final places = FakePlaceService();
@@ -70,12 +48,10 @@ void main() {
       );
       await tester.pump();
 
-      expect(places.getNearbyPlacesCalls, 0);
+      expect(find.text('Find nearby'), findsNothing);
     });
-  });
 
-  group('LocationCustomizePage nearby-place suggestions UI', () {
-    testWidgets('renders fetched suggestions and fills the field on tap', (
+    testWidgets('fetches and opens a sheet listing every result on tap', (
       tester,
     ) async {
       final places = FakePlaceService(
@@ -107,20 +83,93 @@ void main() {
       );
       await tester.pump();
 
+      await tester.tap(find.text('Find nearby'));
+      await tester.pumpAndSettle();
+
+      expect(places.getNearbyPlacesCalls, 1);
+      expect(places.lastLatitude, 1.35);
+      expect(places.lastLongitude, 103.82);
       expect(find.text('Kopi Place'), findsOneWidget);
       expect(find.text('Riverside Park'), findsOneWidget);
+    });
+
+    testWidgets('tapping a place in the sheet fills the field and closes it', (
+      tester,
+    ) async {
+      final places = FakePlaceService(
+        places: const [
+          NearbyPlace(
+            placeId: 'place-1',
+            name: 'Kopi Place',
+            latitude: 1.35,
+            longitude: 103.82,
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        wrap(
+          const LocationCustomizePage(
+            selectedType: PinType.restaurant,
+            latitude: 1.35,
+            longitude: 103.82,
+          ),
+          places: places,
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.text('Find nearby'));
+      await tester.pumpAndSettle();
 
       await tester.tap(find.text('Kopi Place'));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       final formalNameField = tester.widget<TextField>(
         find.byType(TextField).first,
       );
       expect(formalNameField.controller!.text, 'Kopi Place');
-      expect(find.text('Riverside Park'), findsNothing);
+      expect(find.text('Kopi Place'), findsOneWidget);
     });
 
-    testWidgets('renders nothing extra when there are no suggestions', (
+    testWidgets('does not re-fetch on a second tap', (tester) async {
+      final places = FakePlaceService(
+        places: const [
+          NearbyPlace(
+            placeId: 'place-1',
+            name: 'Kopi Place',
+            latitude: 1.35,
+            longitude: 103.82,
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        wrap(
+          const LocationCustomizePage(
+            selectedType: PinType.restaurant,
+            latitude: 1.35,
+            longitude: 103.82,
+          ),
+          places: places,
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.text('Find nearby'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Kopi Place'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Find nearby'));
+      await tester.pumpAndSettle();
+
+      expect(places.getNearbyPlacesCalls, 1);
+      expect(find.text('Kopi Place'), findsNWidgets(2));
+    });
+
+    testWidgets('shows a message when there are no nearby places', (
       tester,
     ) async {
       final places = FakePlaceService();
@@ -137,7 +186,10 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.text("Can't find it? Type it in below."), findsNothing);
+      await tester.tap(find.text('Find nearby'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('No nearby places found.'), findsOneWidget);
     });
   });
 }

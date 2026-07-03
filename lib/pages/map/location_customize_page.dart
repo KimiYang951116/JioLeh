@@ -7,6 +7,7 @@ import 'package:jio_leh/models/nearby_place.dart';
 import 'package:jio_leh/pages/map/models/pin_type.dart';
 import 'package:jio_leh/widgets/app_page_header.dart';
 import 'package:jio_leh/widgets/app_primary_button.dart';
+import 'package:jio_leh/widgets/app_secondary_button.dart';
 import 'package:jio_leh/widgets/app_section_label.dart';
 import 'package:jio_leh/widgets/app_selection_bar.dart';
 import 'package:jio_leh/widgets/app_text_field.dart';
@@ -93,13 +94,15 @@ class _LocationCustomizePageState extends State<LocationCustomizePage> {
   bool _suggestionsFetched = false;
   bool _loadingSuggestions = false;
   List<NearbyPlace> _nearbyPlaces = const [];
-  bool _suggestionsDismissed = false;
 
   final _imagePicker = ImagePicker();
   final _selectedPhotos = <XFile>[];
 
   List<String> get _existingPhotoUrls =>
       widget.initialCustomization?.photoUrls ?? const <String>[];
+
+  bool get _canFindNearby =>
+      !widget.isReadOnly && widget.latitude != null && widget.longitude != null;
 
   @override
   void initState() {
@@ -115,20 +118,16 @@ class _LocationCustomizePageState extends State<LocationCustomizePage> {
     _isPrivate = initial?.isPrivate;
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _fetchNearbySuggestions();
-  }
-
-  Future<void> _fetchNearbySuggestions() async {
-    if (_suggestionsFetched || widget.isReadOnly) return;
+  Future<void> _onFindNearbyPressed() async {
+    if (_suggestionsFetched) {
+      _showNearbySheet();
+      return;
+    }
 
     final latitude = widget.latitude;
     final longitude = widget.longitude;
     if (latitude == null || longitude == null) return;
 
-    _suggestionsFetched = true;
     setState(() {
       _loadingSuggestions = true;
     });
@@ -141,29 +140,78 @@ class _LocationCustomizePageState extends State<LocationCustomizePage> {
 
     setState(() {
       _nearbyPlaces = places;
+      _suggestionsFetched = true;
       _loadingSuggestions = false;
     });
+
+    _showNearbySheet();
   }
 
-  static const _maxSuggestions = 5;
+  void _showNearbySheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        if (_nearbyPlaces.isEmpty) {
+          return const SafeArea(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Nearby places',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                  SizedBox(height: 16),
+                  Center(child: Text('No nearby places found.')),
+                ],
+              ),
+            ),
+          );
+        }
 
-  List<NearbyPlace>? get _suggestionsToShow {
-    if (widget.isReadOnly || _suggestionsDismissed || _nearbyPlaces.isEmpty) {
-      return null;
-    }
-    return _nearbyPlaces.take(_maxSuggestions).toList();
+        return SafeArea(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.6,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Text(
+                    'Nearby places',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                ),
+                Flexible(
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: [
+                      for (final place in _nearbyPlaces)
+                        ListTile(
+                          title: Text(place.name),
+                          onTap: () {
+                            _selectSuggestion(place);
+                            Navigator.pop(context);
+                          },
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _selectSuggestion(NearbyPlace place) {
     setState(() {
       _formalNameController.text = place.name;
-      _suggestionsDismissed = true;
-    });
-  }
-
-  void _dismissSuggestions() {
-    setState(() {
-      _suggestionsDismissed = true;
     });
   }
 
@@ -284,8 +332,6 @@ class _LocationCustomizePageState extends State<LocationCustomizePage> {
 
   @override
   Widget build(BuildContext context) {
-    final suggestions = _suggestionsToShow;
-
     return Scaffold(
       backgroundColor: AppColors.lightBackground,
       body: GestureDetector(
@@ -328,63 +374,6 @@ class _LocationCustomizePageState extends State<LocationCustomizePage> {
                   const SizedBox(height: 20),
                 ],
 
-                if (!widget.isReadOnly && _loadingSuggestions)
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 12),
-                    child: SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  ),
-
-                if (suggestions != null) ...[
-                  Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.lightSection,
-                      borderRadius: BorderRadius.circular(AppRadii.elements),
-                      boxShadow: AppShadows.field,
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        for (var index = 0; index < suggestions.length; index++)
-                          InkWell(
-                            onTap: () => _selectSuggestion(suggestions[index]),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
-                              ),
-                              decoration: index < suggestions.length - 1
-                                  ? const BoxDecoration(
-                                      border: Border(
-                                        bottom: BorderSide(
-                                          color: Colors.black12,
-                                        ),
-                                      ),
-                                    )
-                                  : null,
-                              child: Text(suggestions[index].name),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  GestureDetector(
-                    onTap: _dismissSuggestions,
-                    child: Text(
-                      "Can't find it? Type it in below.",
-                      style: TextStyle(
-                        fontSize: context.scaledFont(AppTextSizes.caption),
-                        color: AppColors.lightSubtitle,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                ],
-
                 const AppSectionLabel(text: 'Formal location name'),
                 const SizedBox(height: 8),
                 AppTextField(
@@ -392,6 +381,19 @@ class _LocationCustomizePageState extends State<LocationCustomizePage> {
                   hintText: 'Example: Springleaf Prata Place',
                   readOnly: widget.isReadOnly,
                 ),
+
+                if (_canFindNearby) ...[
+                  const SizedBox(height: 8),
+                  AppSecondaryButton(
+                    label: _loadingSuggestions
+                        ? 'Finding nearby…'
+                        : 'Find nearby',
+                    icon: Icons.near_me,
+                    onPressed: _loadingSuggestions
+                        ? null
+                        : _onFindNearbyPressed,
+                  ),
+                ],
 
                 const SizedBox(height: 12),
 
