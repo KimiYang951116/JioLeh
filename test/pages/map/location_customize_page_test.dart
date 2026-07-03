@@ -3,15 +3,25 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:jio_leh/app/service_provider.dart';
 import 'package:jio_leh/models/nearby_place.dart';
+import 'package:jio_leh/models/place.dart';
 import 'package:jio_leh/pages/map/location_customize_page.dart';
 import 'package:jio_leh/pages/map/models/pin_type.dart';
 
+import '../../services/fakes/fake_pin_service.dart';
 import '../../services/fakes/fake_place_service.dart';
 
 void main() {
-  Widget wrap(Widget child, {required FakePlaceService places}) {
+  Widget wrap(
+    Widget child, {
+    required FakePlaceService places,
+    FakePinService? pins,
+  }) {
     return MaterialApp(
-      home: ServiceProvider(places: places, child: child),
+      home: ServiceProvider(
+        places: places,
+        pins: pins ?? FakePinService(),
+        child: child,
+      ),
     );
   }
 
@@ -190,6 +200,106 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('No nearby places found.'), findsOneWidget);
+    });
+  });
+
+  group('LocationCustomizePage Link existing button', () {
+    testWidgets('fetches within 0.5km and opens a sheet listing every result', (
+      tester,
+    ) async {
+      final pins = FakePinService(
+        places: const [
+          Place(
+            id: 'place-1',
+            name: 'Old Kopi Place',
+            latitude: 1.35,
+            longitude: 103.82,
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        wrap(
+          const LocationCustomizePage(
+            selectedType: PinType.restaurant,
+            latitude: 1.35,
+            longitude: 103.82,
+          ),
+          places: FakePlaceService(),
+          pins: pins,
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.text('Link existing'));
+      await tester.pumpAndSettle();
+
+      expect(pins.loadPlacesNearLocationCalls, 1);
+      expect(pins.lastLatitude, 1.35);
+      expect(pins.lastLongitude, 103.82);
+      expect(pins.lastRadiusKm, 0.5);
+      expect(find.text('Old Kopi Place'), findsOneWidget);
+    });
+
+    testWidgets(
+      'tapping an existing place fills the field and closes the sheet',
+      (tester) async {
+        final pins = FakePinService(
+          places: const [
+            Place(
+              id: 'place-1',
+              name: 'Old Kopi Place',
+              latitude: 1.35,
+              longitude: 103.82,
+            ),
+          ],
+        );
+
+        await tester.pumpWidget(
+          wrap(
+            const LocationCustomizePage(
+              selectedType: PinType.restaurant,
+              latitude: 1.35,
+              longitude: 103.82,
+            ),
+            places: FakePlaceService(),
+            pins: pins,
+          ),
+        );
+        await tester.pump();
+
+        await tester.tap(find.text('Link existing'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Old Kopi Place'));
+        await tester.pumpAndSettle();
+
+        final formalNameField = tester.widget<TextField>(
+          find.byType(TextField).first,
+        );
+        expect(formalNameField.controller!.text, 'Old Kopi Place');
+      },
+    );
+
+    testWidgets('shows a message when there are no existing places nearby', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          const LocationCustomizePage(
+            selectedType: PinType.restaurant,
+            latitude: 1.35,
+            longitude: 103.82,
+          ),
+          places: FakePlaceService(),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.text('Link existing'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('No existing places found nearby.'), findsOneWidget);
     });
   });
 }

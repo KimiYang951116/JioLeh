@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 
 import 'package:jio_leh/app/service_provider.dart';
 import 'package:jio_leh/models/nearby_place.dart';
+import 'package:jio_leh/models/place.dart';
 import 'package:jio_leh/pages/map/models/pin_type.dart';
 import 'package:jio_leh/widgets/app_page_header.dart';
 import 'package:jio_leh/widgets/app_primary_button.dart';
@@ -25,6 +26,13 @@ class LocationCustomization {
   final bool? isPrivate;
   final List<XFile> selectedPhotos;
   final List<String> photoUrls;
+  // Set when the user links to an already-existing place instead of
+  // creating a new one; null means "create a new place from formalName".
+  final String? existingPlaceId;
+  // Set when formalName came from a "Find nearby" (Google) pick, so the
+  // new place can be deduped against an existing provider place.
+  final String? provider;
+  final String? providerPlaceId;
 
   const LocationCustomization({
     this.pinType = PinType.restaurant,
@@ -35,6 +43,9 @@ class LocationCustomization {
     this.isPrivate,
     this.selectedPhotos = const [],
     this.photoUrls = const [],
+    this.existingPlaceId,
+    this.provider,
+    this.providerPlaceId,
   });
 }
 
@@ -94,6 +105,11 @@ class _LocationCustomizePageState extends State<LocationCustomizePage> {
   bool _suggestionsFetched = false;
   bool _loadingSuggestions = false;
   List<NearbyPlace> _nearbyPlaces = const [];
+  bool _existingPlacesFetched = false;
+  bool _loadingExistingPlaces = false;
+  List<Place> _existingPlaces = const [];
+  String? _selectedExistingPlaceId;
+  NearbyPlace? _selectedNearbyPlace;
 
   final _imagePicker = ImagePicker();
   final _selectedPhotos = <XFile>[];
@@ -101,7 +117,7 @@ class _LocationCustomizePageState extends State<LocationCustomizePage> {
   List<String> get _existingPhotoUrls =>
       widget.initialCustomization?.photoUrls ?? const <String>[];
 
-  bool get _canFindNearby =>
+  bool get _canSearchPlaces =>
       !widget.isReadOnly && widget.latitude != null && widget.longitude != null;
 
   @override
@@ -212,6 +228,110 @@ class _LocationCustomizePageState extends State<LocationCustomizePage> {
   void _selectSuggestion(NearbyPlace place) {
     setState(() {
       _formalNameController.text = place.name;
+      _selectedNearbyPlace = place;
+      _selectedExistingPlaceId = null;
+    });
+  }
+
+  Future<void> _onLinkExistingPressed() async {
+    if (_existingPlacesFetched) {
+      _showExistingPlacesSheet();
+      return;
+    }
+
+    final latitude = widget.latitude;
+    final longitude = widget.longitude;
+    if (latitude == null || longitude == null) return;
+
+    setState(() {
+      _loadingExistingPlaces = true;
+    });
+
+    final places = await ServiceProvider.of(context)!.pins
+        .loadPlacesNearLocation(
+          latitude: latitude,
+          longitude: longitude,
+          radiusKm: 0.5,
+        );
+
+    if (!mounted) return;
+
+    setState(() {
+      _existingPlaces = places;
+      _existingPlacesFetched = true;
+      _loadingExistingPlaces = false;
+    });
+
+    _showExistingPlacesSheet();
+  }
+
+  void _showExistingPlacesSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        if (_existingPlaces.isEmpty) {
+          return const SafeArea(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Existing places',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                  SizedBox(height: 16),
+                  Center(child: Text('No existing places found nearby.')),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return SafeArea(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.6,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Text(
+                    'Existing places',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                ),
+                Flexible(
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: [
+                      for (final place in _existingPlaces)
+                        ListTile(
+                          title: Text(place.name),
+                          onTap: () {
+                            _selectExistingPlace(place);
+                            Navigator.pop(context);
+                          },
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _selectExistingPlace(Place place) {
+    setState(() {
+      _formalNameController.text = place.name;
+      _selectedExistingPlaceId = place.id;
+      _selectedNearbyPlace = null;
     });
   }
 
@@ -299,6 +419,9 @@ class _LocationCustomizePageState extends State<LocationCustomizePage> {
       rating: _rating,
       isPrivate: _isPrivate,
       selectedPhotos: List.unmodifiable(_selectedPhotos),
+      existingPlaceId: _selectedExistingPlaceId,
+      provider: _selectedNearbyPlace == null ? null : 'google',
+      providerPlaceId: _selectedNearbyPlace?.placeId,
     );
 
     final onSave = widget.onSave;
@@ -382,16 +505,34 @@ class _LocationCustomizePageState extends State<LocationCustomizePage> {
                   readOnly: widget.isReadOnly,
                 ),
 
-                if (_canFindNearby) ...[
+                if (_canSearchPlaces) ...[
                   const SizedBox(height: 8),
-                  AppSecondaryButton(
-                    label: _loadingSuggestions
-                        ? 'Finding nearby…'
-                        : 'Find nearby',
-                    icon: Icons.near_me,
-                    onPressed: _loadingSuggestions
-                        ? null
-                        : _onFindNearbyPressed,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: AppSecondaryButton(
+                          label: _loadingSuggestions
+                              ? 'Finding nearby…'
+                              : 'Find nearby',
+                          icon: Icons.near_me,
+                          onPressed: _loadingSuggestions
+                              ? null
+                              : _onFindNearbyPressed,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: AppSecondaryButton(
+                          label: _loadingExistingPlaces
+                              ? 'Linking…'
+                              : 'Link existing',
+                          icon: Icons.link,
+                          onPressed: _loadingExistingPlaces
+                              ? null
+                              : _onLinkExistingPressed,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
 

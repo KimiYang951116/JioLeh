@@ -24,6 +24,7 @@ class FakePinService extends PinService {
 
   UserInsertedPin? lastSavedPin;
   List<XFile> lastSavedPhotos = const [];
+  String? lastExistingPlaceId;
   double? lastLatitude;
   double? lastLongitude;
   double? lastRadiusKm;
@@ -36,11 +37,13 @@ class FakePinService extends PinService {
   @override
   Future<void> saveUserInsertedPin(
     UserInsertedPin pin,
-    List<XFile> photos,
-  ) async {
+    List<XFile> photos, {
+    String? existingPlaceId,
+  }) async {
     saveUserInsertedPinCalls++;
     lastSavedPin = pin;
     lastSavedPhotos = List.unmodifiable(photos);
+    lastExistingPlaceId = existingPlaceId;
 
     if (throwOnSave) {
       throw StateError('FakePinService save failed');

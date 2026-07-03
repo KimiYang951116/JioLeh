@@ -24,8 +24,11 @@ Future<void> addPin(BuildContext context, MapPageModel model) async {
         rating: customization.rating == 0 ? null : customization.rating,
         review: customization.review,
         isPrivate: customization.isPrivate!,
+        provider: customization.provider,
+        providerPlaceId: customization.providerPlaceId,
       ),
       customization.selectedPhotos,
+      existingPlaceId: customization.existingPlaceId,
     ),
   );
 }

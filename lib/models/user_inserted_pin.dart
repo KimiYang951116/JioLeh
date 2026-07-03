@@ -16,6 +16,11 @@ class UserInsertedPin {
   final String? review;
   final bool isPrivate;
 
+  // Set when the formal name came from an external provider (e.g. Google
+  // Places), so the place can be deduped against places.provider_place_id.
+  final String? provider;
+  final String? providerPlaceId;
+
   const UserInsertedPin({
     required this.latitude,
     required this.longitude,
@@ -25,6 +30,8 @@ class UserInsertedPin {
     this.rating,
     this.review,
     required this.isPrivate,
+    this.provider,
+    this.providerPlaceId,
   });
 
   // Creates the row for the places table.
@@ -46,8 +53,10 @@ class UserInsertedPin {
       'latitude': latitude,
       'longitude': longitude,
       'created_by': userId,
-      'source': 'user',
-      'status': 'pending',
+      'source': provider == null ? 'user' : 'provider',
+      'status': provider == null ? 'pending' : 'approved',
+      if (provider != null) 'provider': provider,
+      if (providerPlaceId != null) 'provider_place_id': providerPlaceId,
     };
   }
 

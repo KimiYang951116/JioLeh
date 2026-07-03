@@ -29,25 +29,41 @@ class SupabasePinService extends PinService {
   @override
   Future<void> saveUserInsertedPin(
     UserInsertedPin pin,
-    List<XFile> photos,
-  ) async {
+    List<XFile> photos, {
+    String? existingPlaceId,
+  }) async {
     if (photos.length > 3) {
       throw Exception('Cannot upload more than 3 photos per pin');
     }
 
     final userId = auth.getCurrentUserId();
-    String? placeId;
+    var placeId = existingPlaceId;
+    var weCreatedThePlace = false;
     String? pinId;
     final uploadedPaths = <String>[];
 
     try {
-      final insertedPlace = await _supabase
-          .from(_placesTable)
-          .insert(pin.placeToMap(userId))
-          .select('id')
-          .single();
+      if (placeId == null && pin.provider != null) {
+        final existingPlace = await _supabase
+            .from(_placesTable)
+            .select('id')
+            .eq('provider', pin.provider!)
+            .eq('provider_place_id', pin.providerPlaceId!)
+            .maybeSingle();
 
-      placeId = insertedPlace['id'] as String;
+        placeId = existingPlace?['id'] as String?;
+      }
+
+      if (placeId == null) {
+        final insertedPlace = await _supabase
+            .from(_placesTable)
+            .insert(pin.placeToMap(userId))
+            .select('id')
+            .single();
+
+        placeId = insertedPlace['id'] as String;
+        weCreatedThePlace = true;
+      }
 
       final insertedPin = await _supabase
           .from(_userPinsTable)
@@ -100,7 +116,7 @@ class SupabasePinService extends PinService {
         }
       }
 
-      if (placeId != null) {
+      if (placeId != null && weCreatedThePlace) {
         try {
           await _supabase.from(_placesTable).delete().eq('id', placeId);
         } catch (_) {

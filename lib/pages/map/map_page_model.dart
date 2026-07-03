@@ -102,8 +102,16 @@ class MapPageModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> savePin(UserInsertedPin pin, List<XFile> photos) async {
-    await pins.saveUserInsertedPin(pin, photos);
+  Future<void> savePin(
+    UserInsertedPin pin,
+    List<XFile> photos, {
+    String? existingPlaceId,
+  }) async {
+    await pins.saveUserInsertedPin(
+      pin,
+      photos,
+      existingPlaceId: existingPlaceId,
+    );
     await reloadPlaces();
   }
 
