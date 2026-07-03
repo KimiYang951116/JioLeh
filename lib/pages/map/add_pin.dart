@@ -12,6 +12,8 @@ Future<void> addPin(BuildContext context, MapPageModel model) async {
   await showLocationCustomizePage(
     context,
     PinType.restaurant,
+    latitude: position.latitude,
+    longitude: position.longitude,
     onSave: (customization) => model.savePin(
       UserInsertedPin(
         latitude: position.latitude,
@@ -22,8 +24,11 @@ Future<void> addPin(BuildContext context, MapPageModel model) async {
         rating: customization.rating == 0 ? null : customization.rating,
         review: customization.review,
         isPrivate: customization.isPrivate!,
+        provider: customization.provider,
+        providerPlaceId: customization.providerPlaceId,
       ),
       customization.selectedPhotos,
+      existingPlaceId: customization.existingPlaceId,
     ),
   );
 }

@@ -7,8 +7,13 @@ import 'package:jio_leh/models/user_inserted_pin.dart';
 /// so the real Supabase service can be swapped for a fake in tests.
 abstract class PinService {
   /// Saves a user-created place and its pin, optionally uploading up to three
-  /// photos for that pin.
-  Future<void> saveUserInsertedPin(UserInsertedPin pin, List<XFile> photos);
+  /// photos for that pin. Pass [existingPlaceId] to link the pin to an
+  /// already-existing place instead of creating a new one.
+  Future<void> saveUserInsertedPin(
+    UserInsertedPin pin,
+    List<XFile> photos, {
+    String? existingPlaceId,
+  });
 
   /// Loads places inside [radiusKm] of a map location.
   Future<List<Place>> loadPlacesNearLocation({

@@ -8,6 +8,8 @@ import 'account_service.dart';
 import 'supabase/supabase_account_service.dart';
 import 'friends_service.dart';
 import 'supabase/supabase_friends_service.dart';
+import 'place_service.dart';
+import 'google_place_service.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:jio_leh/services/open_jio_service.dart';
@@ -30,12 +32,16 @@ class Services {
     client: _client,
     auth: auth,
   );
+
   static final location = LocationService();
+
   static final geocoding = GeocodingService();
+
   static final OpenJioService openJio = SupabaseOpenJioService(
     client: _client,
     auth: auth,
   );
+
   static final JioChatService jioChat = SupabaseJioChatService(
     client: _client,
     auth: auth,
@@ -45,8 +51,11 @@ class Services {
     client: _client,
     auth: auth,
   );
+
   static final FriendsService friends = SupabaseFriendsService(
     client: _client,
     auth: auth,
   );
+
+  static final PlaceService places = GooglePlaceService();
 }
