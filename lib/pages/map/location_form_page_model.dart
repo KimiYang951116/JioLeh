@@ -58,11 +58,16 @@ class LocationFormPageModel extends ChangeNotifier {
   List<Place> _existingPlaces = const [];
   List<Place> get existingPlaces => _existingPlaces;
 
-  String? _selectedExistingPlaceId;
-  String? get selectedExistingPlaceId => _selectedExistingPlaceId;
+  Place? _selectedExistingPlace;
+  String? get selectedExistingPlaceId => _selectedExistingPlace?.id;
 
   NearbyPlace? _selectedNearbyPlace;
   NearbyPlace? get selectedNearbyPlace => _selectedNearbyPlace;
+
+  double? get markerLatitude =>
+      _selectedNearbyPlace?.latitude ?? _selectedExistingPlace?.latitude ?? latitude;
+  double? get markerLongitude =>
+      _selectedNearbyPlace?.longitude ?? _selectedExistingPlace?.longitude ?? longitude;
 
   bool _isEnteringManually = false;
   bool get isEnteringManually => _isEnteringManually;
@@ -71,7 +76,7 @@ class LocationFormPageModel extends ChangeNotifier {
 
   String? get placeSourceLabel {
     if (_selectedNearbyPlace != null) return 'From Google';
-    if (_selectedExistingPlaceId != null) return 'Linked from an existing pin';
+    if (_selectedExistingPlace != null) return 'Linked from an existing pin';
     return null;
   }
 
@@ -106,19 +111,19 @@ class LocationFormPageModel extends ChangeNotifier {
 
   void selectSuggestion(NearbyPlace suggestion) {
     _selectedNearbyPlace = suggestion;
-    _selectedExistingPlaceId = null;
+    _selectedExistingPlace = null;
     notifyListeners();
   }
 
   void selectExistingPlace(Place existingPlace) {
-    _selectedExistingPlaceId = existingPlace.id;
+    _selectedExistingPlace = existingPlace;
     _selectedNearbyPlace = null;
     notifyListeners();
   }
 
   void resetPlaceSelection() {
     _selectedNearbyPlace = null;
-    _selectedExistingPlaceId = null;
+    _selectedExistingPlace = null;
     _isEnteringManually = false;
     notifyListeners();
   }
@@ -179,12 +184,14 @@ class LocationFormPageModel extends ChangeNotifier {
     final result = LocationFormResult(
       pinType: _currentType,
       formalName: formalName,
+      latitude: markerLatitude,
+      longitude: markerLongitude,
       name: name,
       review: review,
       rating: _rating,
       isPrivate: _isPrivate,
       selectedPhotos: List.unmodifiable(selectedPhotos),
-      existingPlaceId: _selectedExistingPlaceId,
+      existingPlaceId: _selectedExistingPlace?.id,
       provider: _selectedNearbyPlace == null ? null : 'google',
       providerPlaceId: _selectedNearbyPlace?.placeId,
     );

@@ -1,8 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+// Avoid clash with ImagePicker image source
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' hide ImageSource;
 
 import 'package:jio_leh/app/service_provider.dart';
+import 'package:jio_leh/config/map_env.dart';
 import 'package:jio_leh/models/nearby_place.dart';
 import 'package:jio_leh/models/place.dart';
 import 'package:jio_leh/pages/map/location_form_page_model.dart';
@@ -369,6 +372,53 @@ class _LocationFormPageState extends State<LocationFormPage> {
     Navigator.pop(context, result);
   }
 
+  Future<void> _onSnippetMapCreated(MapboxMap map) async {
+    await map.gestures.updateSettings(
+      GesturesSettings(
+        rotateEnabled: false,
+        pinchToZoomEnabled: false,
+        scrollEnabled: false,
+        pitchEnabled: false,
+        doubleTapToZoomInEnabled: false,
+        doubleTouchToZoomOutEnabled: false,
+        quickZoomEnabled: false,
+      ),
+    );
+    await map.scaleBar.updateSettings(ScaleBarSettings(enabled: false));
+    await map.compass.updateSettings(CompassSettings(enabled: false));
+  }
+
+  Widget _buildMapSnippet() {
+    final lat = _model.markerLatitude!;
+    final lng = _model.markerLongitude!;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(AppRadii.elements),
+      child: SizedBox(
+        height: 150,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            MapWidget(
+              styleUri: MapEnv.mapboxStyleUri,
+              viewport: CameraViewportState(
+                center: Point(coordinates: Position(lng, lat)),
+                zoom: 16,
+              ),
+              onMapCreated: _onSnippetMapCreated,
+            ),
+            Center(
+              child: Text(
+                _model.currentType.emoji,
+                style: const TextStyle(fontSize: 32),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildChosenPlaceCard() {
     final sourceLabel = _model.placeSourceLabel;
 
@@ -436,6 +486,11 @@ class _LocationFormPageState extends State<LocationFormPage> {
               children: [
                 AppPageHeader(title: "Customize Location"),
                 const SizedBox(height: 16),
+                if (_model.markerLatitude != null &&
+                    _model.markerLongitude != null) ...[
+                  _buildMapSnippet(),
+                  const SizedBox(height: 16),
+                ],
                 const AppSectionHeading(text: 'Location'),
                 const SizedBox(height: 10),
                 if (widget.isReadOnly || !_canSearchPlaces) ...[

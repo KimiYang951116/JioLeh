@@ -6,6 +6,10 @@ class LocationFormResult {
   final PinType pinType;
   // The official/formal name of the place (maps to places.name later).
   final String formalName;
+  // The place's own coordinates (from search/link), or null for a custom
+  // place, in which case the caller should fall back to the device position.
+  final double? latitude;
+  final double? longitude;
   // The user's own preference name for the pin (maps to user_pins.custom_name).
   final String name;
   final int rating;
@@ -24,6 +28,8 @@ class LocationFormResult {
   const LocationFormResult({
     this.pinType = PinType.restaurant,
     this.formalName = '',
+    this.latitude,
+    this.longitude,
     required this.name,
     required this.rating,
     required this.review,

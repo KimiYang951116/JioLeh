@@ -16,8 +16,8 @@ Future<void> addPin(BuildContext context, MapPageModel model) async {
     longitude: position.longitude,
     onSave: (result) => model.savePin(
       UserInsertedPin(
-        latitude: position.latitude,
-        longitude: position.longitude,
+        latitude: result.latitude ?? position.latitude,
+        longitude: result.longitude ?? position.longitude,
         formalName: result.formalName,
         customName: result.name,
         emoji: result.pinType.emoji,
