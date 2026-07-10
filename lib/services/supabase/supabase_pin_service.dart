@@ -7,6 +7,7 @@ import 'package:jio_leh/models/place.dart';
 import 'package:jio_leh/models/user_inserted_pin.dart';
 import 'package:jio_leh/services/auth_service.dart';
 import 'package:jio_leh/services/pin_service.dart';
+import 'package:jio_leh/util/category_tally.dart';
 
 /// The real [PinService] used in production, backed by Supabase.
 class SupabasePinService extends PinService {
@@ -99,6 +100,12 @@ class SupabasePinService extends PinService {
             .update({'photo_paths': uploadedPaths})
             .eq('id', pinId);
       }
+
+      try {
+        await _recomputeCategory(placeId);
+      } catch (_) {
+        // Best-effort: category recompute failing must not fail the pin save.
+      }
     } catch (_) {
       if (uploadedPaths.isNotEmpty) {
         try {
@@ -125,6 +132,28 @@ class SupabasePinService extends PinService {
       }
 
       rethrow;
+    }
+  }
+
+  Future<void> _recomputeCategory(String placeId) async {
+    for (var attempt = 0; attempt < 3; attempt++) {
+      final row = await _supabase
+          .from(_placesTable)
+          .select(_placeColumns)
+          .eq('id', placeId)
+          .single();
+
+      final place = Place.fromMap(row);
+      final category = computeCategory(place.pins);
+
+      final updated = await _supabase
+          .from(_placesTable)
+          .update({'category': category})
+          .eq('id', placeId)
+          .eq('pin_count', place.pinCount)
+          .select('id');
+
+      if (updated.isNotEmpty) return;
     }
   }
 
