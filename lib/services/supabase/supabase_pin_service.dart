@@ -105,7 +105,7 @@ class SupabasePinService extends PinService {
       }
 
       await _awardPinPoints(pinId, uploadedPaths.length);
-    } catch (_) {
+    } catch (error) {
       if (uploadedPaths.isNotEmpty) {
         try {
           await _supabase.storage.from(_photoBucket).remove(uploadedPaths);
@@ -130,6 +130,10 @@ class SupabasePinService extends PinService {
         }
       }
 
+      if (error is PostgrestException &&
+          isDuplicatePinError(errorCode: error.code)) {
+        throw const DuplicatePinException();
+      }
       rethrow;
     }
   }
@@ -276,4 +280,9 @@ class SupabasePinService extends PinService {
   double _toRadians(double degrees) {
     return degrees * pi / 180;
   }
+}
+
+bool isDuplicatePinError({required String? errorCode}) {
+  const duplicateCode = '23505';
+  return errorCode == duplicateCode;
 }

@@ -11,6 +11,8 @@ import 'package:jio_leh/models/place.dart';
 import 'package:jio_leh/pages/map/location_form_page_model.dart';
 import 'package:jio_leh/pages/map/models/location_form_result.dart';
 import 'package:jio_leh/pages/map/models/pin_type.dart';
+import 'package:jio_leh/services/pin_service.dart';
+import 'package:jio_leh/widgets/app_field_box.dart';
 import 'package:jio_leh/widgets/app_page_header.dart';
 import 'package:jio_leh/widgets/app_primary_button.dart';
 import 'package:jio_leh/widgets/app_secondary_button.dart';
@@ -146,6 +148,7 @@ class _LocationFormPageState extends State<LocationFormPage> {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      showDragHandle: true,
       builder: (context) {
         if (_model.nearbyPlaces.isEmpty) {
           return const SafeArea(
@@ -219,6 +222,7 @@ class _LocationFormPageState extends State<LocationFormPage> {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      showDragHandle: true,
       builder: (context) {
         if (_model.existingPlaces.isEmpty) {
           return const SafeArea(
@@ -286,6 +290,7 @@ class _LocationFormPageState extends State<LocationFormPage> {
 
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
+      showDragHandle: true,
       builder: (context) {
         return SafeArea(
           child: Wrap(
@@ -354,8 +359,11 @@ class _LocationFormPageState extends State<LocationFormPage> {
     } catch (error) {
       if (!mounted) return;
 
+      final message = error is PinException
+          ? error.toString()
+          : 'Could not save location: $error';
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not save location: $error')),
+        SnackBar(content: Text(message)),
       );
       return;
     }
@@ -512,7 +520,12 @@ class _LocationFormPageState extends State<LocationFormPage> {
                       foregroundColor: AppColors.lightSubtitle,
                     ),
                     onPressed: _model.isSaving ? null : _resetPlaceSelection,
-                    child: const Text('Search instead'),
+                    child: const Text(
+                      'Search instead',
+                      style: TextStyle(
+                        decoration: TextDecoration.underline
+                      ),
+                    ),
                   ),
                 ] else ...[
                   Row(
@@ -552,6 +565,9 @@ class _LocationFormPageState extends State<LocationFormPage> {
                       onPressed: _model.enterManually,
                       child: const Text(
                         "Can't find the place you want? Add it manually",
+                        style: TextStyle(
+                          decoration: TextDecoration.underline
+                        ),
                       ),
                     ),
                   ),
@@ -560,20 +576,28 @@ class _LocationFormPageState extends State<LocationFormPage> {
                 const SizedBox(height: 12),
 
                 if (!widget.isReadOnly) ...[
-                  const AppSectionHeading(text: 'Location type'),
+                  const AppSectionHeading(text: 'Location details'),
                   const SizedBox(height: 8),
-                  AppSelectionBar(
-                    items: [
-                      for (final option in PinType.values)
-                        AppSelectionItem(
-                          label: '${option.emoji} ${option.label}',
-                        ),
-                    ],
-                    selectedIndex: PinType.values.indexOf(_model.currentType),
-                    onChanged: (index) {
-                      if (_model.isSaving) return;
-                      _model.setCurrentType(PinType.values[index]);
-                    },
+                  const AppSectionLabel(text: 'Catagory'),
+                  const SizedBox(height: 8),
+                  Opacity(
+                    opacity: _model.isTypeLocked ? AppOpacity.disabled : 1,
+                    child: IgnorePointer(
+                      ignoring: _model.isTypeLocked,
+                      child: AppSelectionBar(
+                        items: [
+                          for (final option in PinType.values)
+                            AppSelectionItem(
+                              label: '${option.emoji} ${option.label}',
+                            ),
+                        ],
+                        selectedIndex: PinType.values.indexOf(_model.currentType),
+                        onChanged: (index) {
+                          if (_model.isSaving) return;
+                          _model.setCurrentType(PinType.values[index]);
+                        },
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 20),
                 ],
@@ -588,9 +612,9 @@ class _LocationFormPageState extends State<LocationFormPage> {
 
                 const SizedBox(height: 20),
 
-                const AppSectionHeading(text: 'Rate this location'),
+                const AppSectionLabel(text: 'Your Rating'),
 
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -611,9 +635,9 @@ class _LocationFormPageState extends State<LocationFormPage> {
                   ],
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
 
-                const AppSectionHeading(text: 'Visibility'),
+                const AppSectionLabel(text: 'Visibility'),
 
                 const SizedBox(height: 8),
 
@@ -724,11 +748,13 @@ class _LocationFormPageState extends State<LocationFormPage> {
                                       ),
                                     ],
                                   )
-                                : OutlinedButton(
-                                    onPressed: _model.isSaving
-                                        ? null
-                                        : _pickPhoto,
-                                    child: const Icon(Icons.add_a_photo),
+                                : GestureDetector(
+                                    onTap: _model.isSaving ? null : _pickPhoto,
+                                    child: const AppFieldBox(
+                                      child: Center(
+                                        child: Icon(Icons.add_a_photo),
+                                      ),
+                                    ),
                                   ),
                           ),
                         ),
