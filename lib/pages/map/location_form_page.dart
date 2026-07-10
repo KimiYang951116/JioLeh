@@ -11,6 +11,7 @@ import 'package:jio_leh/models/place.dart';
 import 'package:jio_leh/pages/map/location_form_page_model.dart';
 import 'package:jio_leh/pages/map/models/location_form_result.dart';
 import 'package:jio_leh/pages/map/models/pin_type.dart';
+import 'package:jio_leh/services/pin_service.dart';
 import 'package:jio_leh/widgets/app_field_box.dart';
 import 'package:jio_leh/widgets/app_page_header.dart';
 import 'package:jio_leh/widgets/app_primary_button.dart';
@@ -358,8 +359,11 @@ class _LocationFormPageState extends State<LocationFormPage> {
     } catch (error) {
       if (!mounted) return;
 
+      final message = error is PinException
+          ? error.toString()
+          : 'Could not save location: $error';
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not save location: $error')),
+        SnackBar(content: Text(message)),
       );
       return;
     }
