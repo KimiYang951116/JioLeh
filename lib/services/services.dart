@@ -49,7 +49,6 @@ class Services {
   static final OpenJioService openJio = SupabaseOpenJioService(
     client: _client,
     auth: auth,
-    points: points,
   );
 
   static final JioChatService jioChat = SupabaseJioChatService(
