@@ -40,3 +40,14 @@ abstract class PinService {
     required String providerPlaceId,
   });
 }
+
+class PinException implements Exception {
+  final String message;
+  const PinException(this.message);
+  @override
+  String toString() => message;
+}
+
+class DuplicatePinException extends PinException {
+  const DuplicatePinException() : super('You have already pinned this place.');
+}
