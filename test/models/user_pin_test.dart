@@ -14,6 +14,7 @@ void main() {
         'reviews': 'Great view.',
         'photo_paths': ['photo1.jpg', 'photo2.jpg'],
         'is_private': true,
+        'created_at': '2026-07-01T12:00:00.000Z',
       });
 
       expect(pin.id, 'pin-1');
@@ -25,22 +26,41 @@ void main() {
       expect(pin.review, 'Great view.');
       expect(pin.photoPaths, ['photo1.jpg', 'photo2.jpg']);
       expect(pin.isPrivate, isTrue);
+      expect(pin.createdAt, DateTime.parse('2026-07-01T12:00:00.000Z'));
+    });
+
+    test('createdAt is parsed from an ISO 8601 string', () {
+      final pin = UserPin.fromMap({
+        'user_id': 'user-1',
+        'created_at': '2026-07-01T12:00:00.000Z',
+      });
+
+      expect(pin.createdAt, DateTime.parse('2026-07-01T12:00:00.000Z'));
     });
 
     test('emoji defaults to "pin" when missing', () {
-      final pin = UserPin.fromMap({'user_id': 'user-1'});
+      final pin = UserPin.fromMap({
+        'user_id': 'user-1',
+        'created_at': '2026-07-01T12:00:00.000Z',
+      });
 
       expect(pin.emoji, 'pin');
     });
 
     test('isPrivate defaults to false when missing', () {
-      final pin = UserPin.fromMap({'user_id': 'user-1'});
+      final pin = UserPin.fromMap({
+        'user_id': 'user-1',
+        'created_at': '2026-07-01T12:00:00.000Z',
+      });
 
       expect(pin.isPrivate, isFalse);
     });
 
     test('photoPaths defaults to an empty list when missing', () {
-      final pin = UserPin.fromMap({'user_id': 'user-1'});
+      final pin = UserPin.fromMap({
+        'user_id': 'user-1',
+        'created_at': '2026-07-01T12:00:00.000Z',
+      });
 
       expect(pin.photoPaths, isEmpty);
     });
@@ -49,13 +69,17 @@ void main() {
       final pin = UserPin.fromMap({
         'user_id': 'user-1',
         'photo_paths': [123, true],
+        'created_at': '2026-07-01T12:00:00.000Z',
       });
 
       expect(pin.photoPaths, ['123', 'true']);
     });
 
     test('id, placeId, customName, rating, and review are null when absent', () {
-      final pin = UserPin.fromMap({'user_id': 'user-1'});
+      final pin = UserPin.fromMap({
+        'user_id': 'user-1',
+        'created_at': '2026-07-01T12:00:00.000Z',
+      });
 
       expect(pin.id, isNull);
       expect(pin.placeId, isNull);
