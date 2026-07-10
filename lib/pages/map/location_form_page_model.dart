@@ -109,15 +109,45 @@ class LocationFormPageModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void selectSuggestion(NearbyPlace suggestion) {
+  Future<void> selectSuggestion(NearbyPlace suggestion) async {
     _selectedNearbyPlace = suggestion;
     _selectedExistingPlace = null;
     notifyListeners();
+
+    Place? existingPlace;
+    try {
+      existingPlace = await pins.findPlaceByProvider(
+        provider: 'google',
+        providerPlaceId: suggestion.placeId,
+      );
+    } catch (_) {
+      // Best-effort pre-fill: a failed lookup just means no suggestion, not an error.
+      return;
+    }
+    if (_disposed) return;
+
+    final category = existingPlace?.category;
+    if (category == null) return;
+
+    final matchingType = PinType.values.firstWhere(
+      (type) => type.emoji == category,
+      orElse: () => _currentType,
+    );
+    setCurrentType(matchingType);
   }
 
   void selectExistingPlace(Place existingPlace) {
     _selectedExistingPlace = existingPlace;
     _selectedNearbyPlace = null;
+
+    final category = existingPlace.category;
+    if (category != null) {
+      _currentType = PinType.values.firstWhere(
+        (type) => type.emoji == category,
+        orElse: () => _currentType,
+      );
+    }
+
     notifyListeners();
   }
 

@@ -88,7 +88,9 @@ class _SharedPlaceDetailsPageState extends State<SharedPlaceDetailsPage> {
           AppPageHeader(title: widget.place.name),
           const SizedBox(height: 4),
           Text(
-            '$pinCount friends have pinned this place',
+            widget.place.category == null
+                ? '$pinCount friends have pinned this place'
+                : '${widget.place.category} · $pinCount friends have pinned this place',
             style: TextStyle(
               fontSize: context.scaledFont(AppTextSizes.label),
               color: AppColors.lightSubtitle,
