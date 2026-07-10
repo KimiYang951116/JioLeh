@@ -22,9 +22,9 @@ class SupabasePinService extends PinService {
   static const _photoBucket = 'pin-photos';
 
   static const _placeColumns =
-      'id, name, latitude, longitude, pin_count, '
+      'id, name, latitude, longitude, pin_count, category, '
       'user_pins!inner(id, user_id, place_id, custom_name, emoji, ratings, '
-      'reviews, photo_paths, is_private)';
+      'reviews, photo_paths, is_private, created_at)';
 
   @override
   Future<void> saveUserInsertedPin(
@@ -176,6 +176,21 @@ class SupabasePinService extends PinService {
         .lte('longitude', east);
 
     return rows.map(Place.fromMap).toList();
+  }
+
+  @override
+  Future<Place?> findPlaceByProvider({
+    required String provider,
+    required String providerPlaceId,
+  }) async {
+    final row = await _supabase
+        .from(_placesTable)
+        .select(_placeColumns)
+        .eq('provider', provider)
+        .eq('provider_place_id', providerPlaceId)
+        .maybeSingle();
+
+    return row == null ? null : Place.fromMap(row);
   }
 
   @override
