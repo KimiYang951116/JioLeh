@@ -8,7 +8,6 @@ class UserPin {
   final String? review;
   final List<String> photoPaths;
   final bool isPrivate;
-  final DateTime createdAt;
 
   const UserPin({
     this.id,
@@ -20,7 +19,6 @@ class UserPin {
     this.review,
     this.photoPaths = const [],
     this.isPrivate = false,
-    required this.createdAt,
   });
 
   factory UserPin.fromMap(Map<String, dynamic> map) {
@@ -37,7 +35,6 @@ class UserPin {
       photoPaths:
           rawPhotoPaths?.map((path) => path.toString()).toList() ?? const [],
       isPrivate: map['is_private'] as bool? ?? false,
-      createdAt: DateTime.parse(map['created_at'] as String),
     );
   }
 }
