@@ -27,7 +27,7 @@ void main() {
         MapToolbar(onRecenter: () {}, onSuggestions: () => opens++),
       ));
 
-      await tester.tap(find.byIcon(Icons.recommend_outlined));
+      await tester.tap(find.byIcon(Icons.thumb_up));
 
       expect(opens, 1);
     });
