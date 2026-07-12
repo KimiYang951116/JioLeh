@@ -9,7 +9,7 @@ import 'package:jio_leh/pages/auth/widgets/brand_loading_animation.dart';
 import 'package:jio_leh/services/location_service.dart';
 import 'package:jio_leh/services/open_jio_service.dart';
 import 'package:jio_leh/pages/invitations/open_jio_form_page_model.dart';
-import 'package:jio_leh/pages/invitations/widgets/friend_selection_list.dart';
+import 'package:jio_leh/pages/invitations/widgets/friend_avatar_wrap.dart';
 import 'package:jio_leh/util/datetime_format.dart';
 
 import 'package:jio_leh/theme.dart';
@@ -19,6 +19,7 @@ import 'package:jio_leh/widgets/app_map_snippet.dart';
 import 'package:jio_leh/widgets/app_page_header.dart';
 import 'package:jio_leh/widgets/app_primary_button.dart';
 import 'package:jio_leh/widgets/app_secondary_button.dart';
+import 'package:jio_leh/widgets/app_section_heading.dart';
 import 'package:jio_leh/widgets/app_section_label.dart';
 import 'package:jio_leh/widgets/app_snack_bar.dart';
 import 'package:jio_leh/widgets/app_text_field.dart';
@@ -45,6 +46,10 @@ class _OpenJioFormPageState extends State<OpenJioFormPage> {
 
   late final OpenJioService _openJio;
   late Future<List<UserFriend>> _future;
+
+  // Fallback map centre before a place is chosen: Singapore.
+  static const _defaultLatitude = 1.3521;
+  static const _defaultLongitude = 103.8198;
 
   bool get _isViewMode => widget.event != null;
   bool get _isReceivedEvent => widget.event?.senderName != null;
@@ -342,44 +347,22 @@ class _OpenJioFormPageState extends State<OpenJioFormPage> {
                             ),
                             const SizedBox(height: 16),
                           ],
-                          const AppSectionLabel(text: 'Date & Time'),
-                          const SizedBox(height: 8),
-                          GestureDetector(
-                            onTap: _isViewMode ? null : _pickDateTime,
-                            child: AppFieldBox(
-                              height: AppFieldHeights.single,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                ),
-                                child: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    _selectedDateTime != null
-                                        ? formatDateTime(_selectedDateTime!)
-                                        : 'Pick a date and time',
-                                    style: TextStyle(
-                                      fontSize: AppTextSizes.textFieldHint,
-                                      color: _selectedDateTime != null
-                                          ? Colors.black
-                                          : Colors.grey,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
+                          if (!_isViewMode ||
+                              _model.selectedPlace != null) ...[
+                            AppMapSnippet(
+                              latitude: _model.selectedPlace?.latitude ??
+                                  _defaultLatitude,
+                              longitude: _model.selectedPlace?.longitude ??
+                                  _defaultLongitude,
+                              emoji:
+                                  _model.selectedPlace == null ? '' : '📍',
+                              zoom: _model.selectedPlace == null
+                                  ? AppMapSnip.cityZoom
+                                  : AppMapSnip.zoom,
                             ),
-                          ),
-                          const SizedBox(height: 16),
-                          const AppSectionLabel(text: 'Caption'),
-                          const SizedBox(height: 8),
-                          AppTextField(
-                            controller: _captionController,
-                            hintText: 'Add a short caption…',
-                            readOnly: _isViewMode,
-                          ),
-                          const SizedBox(height: 16),
-                          const AppSectionLabel(text: 'Location'),
+                            const SizedBox(height: 16),
+                          ],
+                          const AppSectionHeading(text: 'Location'),
                           const SizedBox(height: 8),
                           AppTextField(
                             controller: _locationController,
@@ -411,28 +394,59 @@ class _OpenJioFormPageState extends State<OpenJioFormPage> {
                               ],
                             ),
                           ],
-                          if (_model.selectedPlace != null) ...[
-                            const SizedBox(height: 8),
-                            AppMapSnippet(
-                              latitude: _model.selectedPlace!.latitude,
-                              longitude: _model.selectedPlace!.longitude,
-                              emoji: '📍',
+                          const SizedBox(height: 16),
+                          const AppSectionHeading(text: 'Date & Time'),
+                          const SizedBox(height: 8),
+                          GestureDetector(
+                            onTap: _isViewMode ? null : _pickDateTime,
+                            child: AppFieldBox(
+                              height: AppFieldHeights.single,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                ),
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    _selectedDateTime != null
+                                        ? formatDateTime(_selectedDateTime!)
+                                        : 'Pick a date and time',
+                                    style: TextStyle(
+                                      fontSize: AppTextSizes.textFieldHint,
+                                      color: _selectedDateTime != null
+                                          ? Colors.black
+                                          : Colors.grey,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
-                          ],
+                          ),
+                          const SizedBox(height: 16),
+                          const AppSectionHeading(text: 'Caption'),
+                          const SizedBox(height: 8),
+                          AppTextField(
+                            controller: _captionController,
+                            hintText: 'Add a short caption…',
+                            readOnly: _isViewMode,
+                          ),
                           const SizedBox(height: 16),
                           if (hasFriends) ...[
-                            AppSectionLabel(
+                            AppSectionHeading(
                               text: _isReceivedEvent
                                   ? 'Also invited'
                                   : 'Invited Friends',
                             ),
                             const SizedBox(height: 8),
                             Expanded(
-                              child: FriendSelectionList(
-                                friends: friends,
-                                selectedFriendIds: _selectedFriendIds,
-                                onToggle: _toggleFriend,
-                                readOnly: _isViewMode,
+                              child: SingleChildScrollView(
+                                child: FriendAvatarWrap(
+                                  friends: friends,
+                                  selectedFriendIds: _selectedFriendIds,
+                                  onToggle: _toggleFriend,
+                                  readOnly: _isViewMode,
+                                ),
                               ),
                             ),
                           ],

@@ -479,7 +479,7 @@ class _LocationFormPageState extends State<LocationFormPage> {
                 ] else if (_model.isEnteringManually) ...[
                   AppTextField(
                     controller: _formalNameController,
-                    hintText: 'Example: National University of Singapore',
+                    hintText: 'Pin on your current location',
                   ),
                   const SizedBox(height: 8),
                   TextButton(
