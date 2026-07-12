@@ -116,6 +116,14 @@ class AppTextSizes {
   static const caption = 12.0;
 }
 
+// The static mini-map preview used to show a chosen location.
+class AppMapSnip {
+  static const height = 150.0;
+  static const zoom = 16.0;
+  static const emojiSize = 32.0;
+}
+
+
 // Extension on BuildContext to provide responsive text scaling based on screen width.
 extension ResponsiveText on BuildContext {
   double scaledFont(double base) {
