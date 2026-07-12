@@ -23,6 +23,9 @@ class OpenJioFormPageModel extends ChangeNotifier {
   NearbyPlace? _selectedPlace;
   NearbyPlace? get selectedPlace => _selectedPlace;
 
+  // Set when the selection came from an already-registered place; provider picks resolve lazily on submit.
+  String? _selectedDbPlaceId;
+
   bool _isSearching = false;
   bool get isSearching => _isSearching;
 
@@ -75,10 +78,10 @@ class OpenJioFormPageModel extends ChangeNotifier {
 
   void selectPlace(NearbyPlace chosen) {
     _selectedPlace = chosen;
+    _selectedDbPlaceId = null;
     notifyListeners();
   }
 
-  // An existing place carries no provider id; only the display fields are kept until events can link a place_id.
   void selectExistingPlace(Place chosen) {
     _selectedPlace = NearbyPlace(
       placeId: '',
@@ -86,13 +89,29 @@ class OpenJioFormPageModel extends ChangeNotifier {
       latitude: chosen.latitude,
       longitude: chosen.longitude,
     );
+    _selectedDbPlaceId = chosen.id;
     notifyListeners();
   }
 
   void clearSelectedPlace() {
     if (_selectedPlace == null) return;
     _selectedPlace = null;
+    _selectedDbPlaceId = null;
     notifyListeners();
+  }
+
+  /// Resolves the places-row id for the current selection, registering a provider place on first use. Best-effort: a failed lookup returns null so the event still saves with just its location name.
+  Future<String?> resolvePlaceId() async {
+    final selected = _selectedPlace;
+    if (selected == null) return null;
+    if (_selectedDbPlaceId != null) return _selectedDbPlaceId;
+    if (selected.placeId.isEmpty) return null;
+
+    try {
+      return await pins.getOrCreateProviderPlaceId(selected);
+    } catch (_) {
+      return null;
+    }
   }
 
   @override

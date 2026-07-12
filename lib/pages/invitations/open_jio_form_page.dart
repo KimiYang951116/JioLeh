@@ -261,10 +261,13 @@ class _OpenJioFormPageState extends State<OpenJioFormPage> {
     }
   }
 
-  void _submit(List<UserFriend> friends) {
+  Future<void> _submit(List<UserFriend> friends) async {
     final selectedFriends = friends
         .where((friend) => _selectedFriendIds.contains(friend.userProfile.id))
         .toList();
+
+    final placeId = await _model.resolvePlaceId();
+    if (!mounted) return;
 
     Navigator.pop(
       context,
@@ -273,6 +276,7 @@ class _OpenJioFormPageState extends State<OpenJioFormPage> {
         dateTime: _selectedDateTime!,
         caption: _captionController.text.trim(),
         locationName: _locationController.text.trim(),
+        placeId: placeId,
       ),
     );
   }
