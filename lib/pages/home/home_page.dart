@@ -51,7 +51,13 @@ class _HomePageState extends State<HomePage> {
       MapPage(model: _mapModel),
       const InvitationsPage(),
       const FriendsPage(),
-      const ProfilePage(), // null userId => the current user's own profile
+      ProfilePage(
+        // null userId => the current user's own profile
+        onSuggestedPlaceSelected: (place) {
+          _mapModel.requestCameraMove(place.latitude, place.longitude);
+          setState(() => _index = 0); // jump to the Map tab
+        },
+      ), // null userId => the current user's own profile
     ];
   }
 
