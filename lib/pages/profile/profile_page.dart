@@ -8,7 +8,6 @@ import 'package:jio_leh/pages/profile/widgets/profile_card.dart';
 import 'package:jio_leh/routing/app_routing.dart';
 import 'package:jio_leh/theme.dart';
 import 'package:jio_leh/widgets/app_page_header.dart';
-import 'package:jio_leh/widgets/app_primary_button.dart';
 import 'package:jio_leh/widgets/app_snack_bar.dart';
 import 'package:jio_leh/models/suggested_place.dart';
 import 'package:jio_leh/pages/profile/widgets/suggested_places_section.dart';
@@ -181,16 +180,6 @@ class _ProfilePageState extends State<ProfilePage> {
               },
             ),
           ],
-          // Logout only makes sense on your own profile, not when viewing
-          // someone else's.
-          const SizedBox(height: 16),
-          if (_model.isOwnProfile)
-            AppPrimaryButton(
-              backgroundColor: AppColors.danger,
-              liftColor: AppColors.dangerShadow,
-              label: 'Log out',
-              onPressed: _model.signOut,
-            ),
         ],
       ),
     );
