@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:jio_leh/app/service_provider.dart';
 import 'package:jio_leh/models/suggested_place.dart';
-import 'package:jio_leh/pages/map/widgets/suggested_places_section.dart';
+import 'package:jio_leh/pages/profile/widgets/suggested_places_section.dart';
 
 import '../../../services/fakes/fake_suggested_places_service.dart';
 

@@ -12,8 +12,8 @@ void main() {
     testWidgets('tapping the recenter button fires onRecenter', (tester) async {
       var recenters = 0;
       await tester.pumpWidget(wrap(
-        MapToolbar(onRecenter: () => recenters++, onSuggestions: () {}),
-      ));
+        MapToolbar(onRecenter: () => recenters++),
+        ));
 
       await tester.tap(find.byIcon(Icons.my_location));
 
@@ -24,7 +24,7 @@ void main() {
         (tester) async {
       var opens = 0;
       await tester.pumpWidget(wrap(
-        MapToolbar(onRecenter: () {}, onSuggestions: () => opens++),
+        MapToolbar(onRecenter: () {}),
       ));
 
       await tester.tap(find.byIcon(Icons.thumb_up));
