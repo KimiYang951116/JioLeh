@@ -8,12 +8,17 @@ import 'package:jio_leh/pages/profile/widgets/profile_card.dart';
 import 'package:jio_leh/routing/app_routing.dart';
 import 'package:jio_leh/theme.dart';
 import 'package:jio_leh/widgets/app_page_header.dart';
+import 'package:jio_leh/widgets/app_primary_button.dart';
 import 'package:jio_leh/widgets/app_snack_bar.dart';
+import 'package:jio_leh/models/suggested_place.dart';
+import 'package:jio_leh/pages/profile/widgets/suggested_places_section.dart';
+
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key, this.userId});
+  const ProfilePage({super.key, this.userId, this.onSuggestedPlaceSelected});
 
   final String? userId;
+  final ValueChanged<SuggestedPlace>? onSuggestedPlaceSelected;
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -147,7 +152,7 @@ class _ProfilePageState extends State<ProfilePage> {
       return const Center(child: Text('Profile not found.'));
     }
 
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 30),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -166,6 +171,26 @@ class _ProfilePageState extends State<ProfilePage> {
             onAddFriend: _sendFriendRequest,
             onLogout: _model.signOut,
           ),
+          // Suggestions only make sense for your own profile, not when
+          // viewing someone else's.
+          if (_model.isOwnProfile) ...[
+            const SizedBox(height: 16),
+            SuggestedPlacesSection(
+              onPlaceSelected: (place) {
+                widget.onSuggestedPlaceSelected?.call(place);
+              },
+            ),
+          ],
+          // Logout only makes sense on your own profile, not when viewing
+          // someone else's.
+          const SizedBox(height: 16),
+          if (_model.isOwnProfile)
+            AppPrimaryButton(
+              backgroundColor: AppColors.danger,
+              liftColor: AppColors.dangerShadow,
+              label: 'Log out',
+              onPressed: _model.signOut,
+            ),
         ],
       ),
     );
