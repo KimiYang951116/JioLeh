@@ -22,7 +22,11 @@ class SupabaseFogService extends FogService{
         {'user_id': userId, 'tile_x': tile.x, 'tile_y': tile.y},
     ];
 
-    await _supabase.from(_table).upsert(rows, ignoreDuplicates: true);
+    await _supabase.from(_table).upsert(
+      rows,
+      onConflict: 'user_id,tile_x,tile_y',
+      ignoreDuplicates: true,
+    );
   }
 
   @override
