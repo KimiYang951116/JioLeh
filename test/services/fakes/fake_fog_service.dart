@@ -11,6 +11,7 @@ class FakeFogService extends FogService {
 
   List<FogTile> tiles;
   bool throwOnSave;
+  Object? loadError;
 
   int saveTilesCalls = 0;
   int loadTilesInBoundsCalls = 0;
@@ -39,6 +40,10 @@ class FakeFogService extends FogService {
     required double north,
   }) async {
     loadTilesInBoundsCalls++;
+
+    final error = loadError;
+    if (error != null) throw error;
+
     lastWest = west;
     lastSouth = south;
     lastEast = east;
