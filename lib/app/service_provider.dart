@@ -12,6 +12,7 @@ import 'package:jio_leh/services/points_service.dart';
 import 'package:jio_leh/services/pin_service.dart';
 import 'package:jio_leh/services/place_service.dart';
 import 'package:jio_leh/services/services.dart';
+import 'package:jio_leh/services/photo_tagging_service.dart';   // ADD near other imports
 
 /// An [InheritedWidget] that provides access to application services throughout
 /// the widget tree.
@@ -25,6 +26,7 @@ class ServiceProvider extends InheritedWidget {
     AuthService? auth,
     AccountService? account,
     PinService? pins,
+    PhotoTaggingService? photoTagging,
     LocationService? location,
     GeocodingService? geocoding,
     PlaceService? places,
@@ -33,11 +35,12 @@ class ServiceProvider extends InheritedWidget {
     JioChatService? jioChat,
     PointsService? points,
     SuggestedPlacesService? suggestedPlaces,
-    
+  
     required super.child,
   }) : _auth = auth,
        _account = account,
        _pins = pins,
+       _photoTagging = photoTagging,
        _location = location,
        _geocoding = geocoding,
        _places = places,
@@ -57,11 +60,13 @@ class ServiceProvider extends InheritedWidget {
   final OpenJioService? _openJio;
   final JioChatService? _jioChat;
   final PointsService? _points;
+  final PhotoTaggingService? _photoTagging;
   final SuggestedPlacesService? _suggestedPlaces;
   
   AuthService get auth => _auth ?? Services.auth;
   AccountService get account => _account ?? Services.account;
   PinService get pins => _pins ?? Services.pins;
+  PhotoTaggingService get photoTagging => _photoTagging ?? Services.photoTagging;
   PointsService get points => _points ?? Services.points;
   SuggestedPlacesService get suggestedPlaces => _suggestedPlaces ?? Services.suggestedPlaces;
   LocationService get location => _location ?? Services.location;
