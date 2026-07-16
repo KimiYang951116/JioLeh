@@ -8,12 +8,14 @@ import 'package:jio_leh/widgets/app_primary_button.dart';
 class SignInPanel extends StatelessWidget {
   const SignInPanel({
     super.key,
-    required this.isSigningIn,
+    required this.isGoogleSigningIn,
+    required this.isAppleSigningIn,
     required this.onGooglePressed,
     this.onApplePressed,
   });
 
-  final bool isSigningIn;
+  final bool isGoogleSigningIn;
+  final bool isAppleSigningIn;
   final VoidCallback? onGooglePressed;
   final VoidCallback? onApplePressed;
 
@@ -51,57 +53,27 @@ class SignInPanel extends StatelessWidget {
               ),
             ),
           ),
-          if (onGooglePressed != null && onApplePressed != null) ...[
+          if (onApplePressed != null) ...[
             const SizedBox(height: 16),
-            // Side by side, so the labels drop the "Continue with" prefix to fit.
-            Row(
-              children: [
-                Expanded(
-                  child: AppPrimaryButton(
-                    label: 'Google',
-                    onPressed: onGooglePressed,
-                    leading: const _GoogleLogoDisc(),
-                    isLoading: isSigningIn,
-                    backgroundColor: AppColors.darkButton,
-                    liftColor: Colors.black,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: AppPrimaryButton(
-                    label: 'Apple',
-                    onPressed: onApplePressed,
-                    icon: Icons.apple,
-                    isLoading: isSigningIn,
-                    backgroundColor: AppColors.darkButton,
-                    liftColor: Colors.black,
-                  ),
-                ),
-              ],
+            AppPrimaryButton(
+              label: 'Continue with Apple',
+              onPressed: onApplePressed,
+              icon: Icons.apple,
+              isLoading: isAppleSigningIn,
+              backgroundColor: AppColors.darkButton,
+              liftColor: Colors.black,
             ),
-          ] else ...[
-            if (onGooglePressed != null) ...[
-              const SizedBox(height: 16),
-              AppPrimaryButton(
-                label: 'Continue with Google',
-                onPressed: onGooglePressed,
-                leading: const _GoogleLogoDisc(),
-                isLoading: isSigningIn,
-                backgroundColor: AppColors.darkButton,
-                liftColor: Colors.black,
-              ),
-            ],
-            if (onApplePressed != null) ...[
-              const SizedBox(height: 16),
-              AppPrimaryButton(
-                label: 'Continue with Apple',
-                onPressed: onApplePressed,
-                icon: Icons.apple,
-                isLoading: isSigningIn,
-                backgroundColor: AppColors.darkButton,
-                liftColor: Colors.black,
-              ),
-            ],
+          ],
+          if (onGooglePressed != null) ...[
+            const SizedBox(height: 16),
+            AppPrimaryButton(
+              label: 'Continue with Google',
+              onPressed: onGooglePressed,
+              leading: const _GoogleLogoDisc(),
+              isLoading: isGoogleSigningIn,
+              backgroundColor: AppColors.darkButton,
+              liftColor: Colors.black,
+            ),
           ],
           const SizedBox(height: 16),
           const _TermsText(),
@@ -121,9 +93,9 @@ class _TermsText extends StatefulWidget {
 class _TermsTextState extends State<_TermsText> {
   late final TapGestureRecognizer _privacyRecognizer = TapGestureRecognizer()
     ..onTap = () => launchUrl(
-          Uri.parse('https://jio-leh-website.vercel.app/privacy'),
-          mode: LaunchMode.inAppBrowserView,
-        );
+      Uri.parse('https://jio-leh-website.vercel.app/privacy'),
+      mode: LaunchMode.inAppBrowserView,
+    );
 
   @override
   void dispose() {
