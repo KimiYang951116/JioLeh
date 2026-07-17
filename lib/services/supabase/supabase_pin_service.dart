@@ -31,7 +31,7 @@ class SupabasePinService extends PinService {
   static const _placeColumns =
       'id, name, latitude, longitude, pin_count, category, '
       'user_pins!inner(id, user_id, place_id, custom_name, emoji, ratings, '
-      'reviews, photo_paths, is_private)';
+      'reviews, photo_paths, ai_tags, is_private)';
 
   @override
   Future<void> saveUserInsertedPin(
@@ -110,7 +110,7 @@ class SupabasePinService extends PinService {
             .eq('id', pinId);
       }
 
-      if (allTags.isNotEmpty) {   // ADD this whole block
+      if (allTags.isNotEmpty) { 
         try {
           await _supabase
               .from(_userPinsTable)

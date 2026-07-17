@@ -96,7 +96,7 @@ class PinnedSpotCard extends StatelessWidget {
                 color: AppColors.lightSubtitle,
               ),
             ),
-          if (entry.tags.isNotEmpty) ...[               // ADD
+          if (entry.tags.isNotEmpty) ...[  
             const SizedBox(height: 4),
             TagChipRow(tags: entry.tags),
           ],
