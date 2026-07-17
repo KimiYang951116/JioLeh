@@ -15,7 +15,9 @@ const _previewCount = 4;
 /// Shows a small preview grid of places the current user has pinned, with
 /// a "See all" link to the full list. Only makes sense on your own profile.
 class PinnedSpotsSection extends StatefulWidget {
-  const PinnedSpotsSection({super.key});
+  const PinnedSpotsSection({super.key, this.userId});
+
+  final String? userId;
 
   @override
   State<PinnedSpotsSection> createState() => _PinnedSpotsSectionState();
@@ -25,6 +27,8 @@ class _PinnedSpotsSectionState extends State<PinnedSpotsSection> {
   late PinService _pins;
   late AuthService _auth;
   Future<List<PinnedSpotEntry>>? _future;
+
+  bool get _isOwnProfile => widget.userId == null;
 
   @override
   void didChangeDependencies() {
@@ -36,7 +40,7 @@ class _PinnedSpotsSectionState extends State<PinnedSpotsSection> {
   }
 
   Future<List<PinnedSpotEntry>> _loadEntries() async {
-    final userId = _auth.getCurrentUserId();
+    final userId = widget.userId ?? _auth.getCurrentUserId();
     final places = await _pins.loadPlacesPinnedByUser(userId);
 
     final paths = <String>[];
@@ -82,13 +86,19 @@ class _PinnedSpotsSectionState extends State<PinnedSpotsSection> {
         }
 
         if (snapshot.hasError) {
-          return const Text("Couldn't load your pinned spots.");
+          return Text(
+            _isOwnProfile
+                ? "Couldn't load your pinned spots."
+                : "Couldn't load pinned spots.",
+          );
         }
 
         final entries = snapshot.data ?? [];
         if (entries.isEmpty) {
-          return const Text(
-            'No pinned spots yet. Start pinning places you visit!',
+          return Text(
+            _isOwnProfile
+                ? 'No pinned spots yet. Start pinning places you visit!'
+                : 'No pinned spots yet.',
           );
         }
 
@@ -101,17 +111,22 @@ class _PinnedSpotsSectionState extends State<PinnedSpotsSection> {
           children: [
             Row(
               children: [
-                Expanded(child: const AppSectionHeading(text: 'My Pins')),
-                GestureDetector(
-                  onTap: () => showMyPinnedSpotsPage(context),
-                  child: const Text(
-                    'See all',
-                    style: TextStyle(
-                      color: AppColors.lightWidgetBackground,
-                      fontWeight: FontWeight.bold,
-                    ),
+                Expanded(
+                  child: AppSectionHeading(
+                    text: _isOwnProfile ? 'My Pins' : 'Pins',
                   ),
                 ),
+                if (_isOwnProfile)
+                  GestureDetector(
+                    onTap: () => showMyPinnedSpotsPage(context),
+                    child: const Text(
+                      'See all',
+                      style: TextStyle(
+                        color: AppColors.lightWidgetBackground,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
               ],
             ),
             const SizedBox(height: 12),
