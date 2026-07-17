@@ -141,11 +141,14 @@ class _SharedPlaceDetailsSheetState extends State<SharedPlaceDetailsSheet> {
   }
 
   List<Widget> _buildChildren() {
+    final statusHeight =
+        MediaQuery.of(context).size.height * AppPlaceSheet.initialExtent;
+
     if (_model.isLoading) {
-      return const [
+      return [
         SizedBox(
-          height: 200,
-          child: Center(child: BrandLoadingAnimation()),
+          height: statusHeight,
+          child: const Center(child: BrandLoadingAnimation.compact()),
         ),
       ];
     }
@@ -153,7 +156,7 @@ class _SharedPlaceDetailsSheetState extends State<SharedPlaceDetailsSheet> {
     if (_model.error != null) {
       return [
         SizedBox(
-          height: 200,
+          height: statusHeight,
           child: Center(
             child: Text(
               'Could not load location details: ${_model.error}',
