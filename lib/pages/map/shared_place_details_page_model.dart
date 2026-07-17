@@ -6,7 +6,7 @@ import 'package:jio_leh/services/account_service.dart';
 import 'package:jio_leh/services/auth_service.dart';
 import 'package:jio_leh/services/pin_service.dart';
 
-/// Presentation state and logic for [SharedPlaceDetailsPage].
+/// Presentation state and logic for [SharedPlaceDetailsSheet].
 ///
 /// Resolves every friend's [UserPin] on [place] into a [FriendPinEntry] by
 /// fetching their profile and signed photo URLs. Call [load] once after
