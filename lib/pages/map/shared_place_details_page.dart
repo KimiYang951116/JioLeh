@@ -5,7 +5,7 @@ import 'package:jio_leh/models/place.dart';
 import 'package:jio_leh/pages/auth/widgets/brand_loading_animation.dart';
 import 'package:jio_leh/pages/map/models/pin_type.dart';
 import 'package:jio_leh/pages/map/shared_place_details_page_model.dart';
-import 'package:jio_leh/pages/map/widgets/friend_review_tile.dart';
+import 'package:jio_leh/pages/map/widgets/friend_pin_card.dart';
 import 'package:jio_leh/pages/map/widgets/place_photo_strip.dart';
 import 'package:jio_leh/theme.dart';
 import 'package:jio_leh/widgets/tag_chip_row.dart';
@@ -178,15 +178,15 @@ class _SharedPlaceDetailsSheetState extends State<SharedPlaceDetailsSheet> {
         const SizedBox(height: 8),
         _buildRatingRow(average),
       ],
-      const SizedBox(height: 8),
+      const SizedBox(height: 16),
       for (final entry in _model.entries) ...[
-        const Divider(height: 32),
-        FriendReviewTile(
+        FriendPinCard(
           profile: entry.profile,
           pin: entry.pin,
           photoUrls: entry.photoUrls,
           isCurrentUser: entry.isCurrentUser,
         ),
+        const SizedBox(height: 12),
       ],
     ];
   }
