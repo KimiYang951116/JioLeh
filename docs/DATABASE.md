@@ -61,6 +61,7 @@ user id and is created during onboarding by `AccountService.createProfile`.
 | `reviews` | text | Optional review, limited to 500 characters |
 | `photo_paths` | text[] | Supabase Storage paths, maximum three photos |
 | `created_at` | timestamp | Row creation time |
+| `ai_tags` | text[] | Google Cloud Vision labels, confidence ≥ 0.7 |
 
 ### `friendships`
 

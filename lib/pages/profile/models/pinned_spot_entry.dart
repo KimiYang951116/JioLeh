@@ -13,4 +13,6 @@ class PinnedSpotEntry {
   final Place place;
   final UserPin pin;
   final String? thumbnailUrl;
+
+  List<String> get tags => pin.aiTags;
 }
