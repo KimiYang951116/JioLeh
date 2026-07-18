@@ -50,11 +50,14 @@ abstract class PinService {
     required String providerPlaceId,
   });
 
-  /// Returns the id of the places row for a provider-sourced [place], registering it first if it does not exist yet (find-or-create).
+  /// Returns the id of the places row for a provider-sourced [place], registering it first if it does not exist yet.
   Future<String> getOrCreateProviderPlaceId(
     NearbyPlace place, {
     String provider = 'google',
   });
+
+  /// Classifies sentiment for the current user's own pins whose review has no sentiment yet.
+  Future<void> classifyUnclassifiedReviews();
 }
 
 class PinException implements Exception {

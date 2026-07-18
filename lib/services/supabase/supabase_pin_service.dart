@@ -9,6 +9,7 @@ import 'package:jio_leh/models/user_inserted_pin.dart';
 import 'package:jio_leh/services/auth_service.dart';
 import 'package:jio_leh/services/pin_service.dart';
 import 'package:jio_leh/services/photo_tagging_service.dart';
+import 'package:jio_leh/services/sentiment_service.dart';
 
 import 'package:jio_leh/models/point_transaction.dart';
 import 'package:jio_leh/services/points_service.dart';
@@ -16,12 +17,13 @@ import 'package:jio_leh/services/points_service.dart';
 /// The real [PinService] used in production, backed by Supabase.
 class SupabasePinService extends PinService {
   // `required this.auth` stores the injected AuthService in the auth field.
-  SupabasePinService({required SupabaseClient client, required this.auth, required this.points, required this.photoTagging})
+  SupabasePinService({required SupabaseClient client, required this.auth, required this.points, required this.photoTagging, required this.sentiment})
     : _supabase = client;
 
   final AuthService auth;
   final PointsService points;
   final PhotoTaggingService photoTagging;
+  final SentimentService sentiment;
   final SupabaseClient _supabase;
 
   static const _placesTable = 'places';
@@ -31,7 +33,8 @@ class SupabasePinService extends PinService {
   static const _placeColumns =
       'id, name, latitude, longitude, pin_count, category, '
       'user_pins!inner(id, user_id, place_id, custom_name, emoji, ratings, '
-      'reviews, photo_paths, ai_tags, is_private)';
+      'reviews, photo_paths, ai_tags, is_private, sentiment_label, '
+      'sentiment_score)';
 
   @override
   Future<void> saveUserInsertedPin(
@@ -110,7 +113,7 @@ class SupabasePinService extends PinService {
             .eq('id', pinId);
       }
 
-      if (allTags.isNotEmpty) { 
+      if (allTags.isNotEmpty) {
         try {
           await _supabase
               .from(_userPinsTable)
@@ -118,6 +121,24 @@ class SupabasePinService extends PinService {
               .eq('id', pinId);
         } catch (_) {
           // Tags are enrichment, not critical — the pin itself already saved.
+        }
+      }
+
+      final reviewText = pin.review?.trim() ?? '';
+      if (reviewText.isNotEmpty) {
+        final sentimentResult = await sentiment.classify(reviewText);
+        if (sentimentResult != null) {
+          try {
+            await _supabase
+                .from(_userPinsTable)
+                .update({
+                  'sentiment_label': sentimentResult.label,
+                  'sentiment_score': sentimentResult.score,
+                })
+                .eq('id', pinId);
+          } catch (_) {
+            // Sentiment is enrichment, not critical — the pin itself already saved.
+          }
         }
       }
 
@@ -279,13 +300,42 @@ class SupabasePinService extends PinService {
         .from(_placesTable)
         .select('id, name, latitude, longitude, pin_count, category, '
             'user_pins(id, user_id, place_id, custom_name, emoji, ratings, '
-            'reviews, photo_paths, is_private)')
+            'reviews, photo_paths, is_private, sentiment_label, '
+            'sentiment_score)')
         .eq('id', placeId)
         .maybeSingle();
 
     return row == null ? null : Place.fromMap(row);
   }
 
+  @override
+  Future<void> classifyUnclassifiedReviews() async {
+    try {
+      final userId = auth.getCurrentUserId();
+      final rows = await _supabase
+          .from(_userPinsTable)
+          .select('id, reviews')
+          .eq('user_id', userId)
+          .not('reviews', 'is', null)
+          .neq('reviews', '')
+          .isFilter('sentiment_label', null);
+
+      for (final row in rows) {
+        final result = await sentiment.classify(row['reviews'] as String);
+        if (result == null) return;
+
+        await _supabase
+            .from(_userPinsTable)
+            .update({
+              'sentiment_label': result.label,
+              'sentiment_score': result.score,
+            })
+            .eq('id', row['id'] as String);
+      }
+    } catch (_) {
+      // Best-effort sweep the next app open tries again.
+    }
+  }
 
     // Points are a bonus, not a critical path — award best-effort so a
   // points-write hiccup never fails an otherwise-successful pin save.

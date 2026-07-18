@@ -13,7 +13,8 @@ import 'package:jio_leh/services/pin_service.dart';
 import 'package:jio_leh/services/fog_service.dart';
 import 'package:jio_leh/services/place_service.dart';
 import 'package:jio_leh/services/services.dart';
-import 'package:jio_leh/services/photo_tagging_service.dart';  
+import 'package:jio_leh/services/photo_tagging_service.dart';
+import 'package:jio_leh/services/sentiment_service.dart';
 
 /// An [InheritedWidget] that provides access to application services throughout
 /// the widget tree.
@@ -28,6 +29,7 @@ class ServiceProvider extends InheritedWidget {
     AccountService? account,
     PinService? pins,
     PhotoTaggingService? photoTagging,
+    SentimentService? sentiment,
     FogService? fog,
     LocationService? location,
     GeocodingService? geocoding,
@@ -43,6 +45,7 @@ class ServiceProvider extends InheritedWidget {
        _account = account,
        _pins = pins,
        _photoTagging = photoTagging,
+       _sentiment = sentiment,
        _fog = fog,
        _location = location,
        _geocoding = geocoding,
@@ -65,12 +68,14 @@ class ServiceProvider extends InheritedWidget {
   final JioChatService? _jioChat;
   final PointsService? _points;
   final PhotoTaggingService? _photoTagging;
+  final SentimentService? _sentiment;
   final SuggestedPlacesService? _suggestedPlaces;
   
   AuthService get auth => _auth ?? Services.auth;
   AccountService get account => _account ?? Services.account;
   PinService get pins => _pins ?? Services.pins;
   PhotoTaggingService get photoTagging => _photoTagging ?? Services.photoTagging;
+  SentimentService get sentiment => _sentiment ?? Services.sentiment;
   FogService get fog => _fog ?? Services.fog;
   PointsService get points => _points ?? Services.points;
   SuggestedPlacesService get suggestedPlaces => _suggestedPlaces ?? Services.suggestedPlaces;

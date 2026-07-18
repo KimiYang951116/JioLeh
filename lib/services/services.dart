@@ -24,6 +24,8 @@ import 'package:jio_leh/services/jio_chat_service.dart';
 import 'package:jio_leh/services/supabase/supabase_jio_chat_service.dart';
 import 'photo_tagging_service.dart';
 import 'google_vision_photo_tagging_service.dart';
+import 'sentiment_service.dart';
+import 'cloud_run_sentiment_service.dart';
 
 
 /// A singleton class that provides access to all application services.
@@ -44,11 +46,14 @@ class Services {
 
   static final PhotoTaggingService photoTagging = GoogleVisionPhotoTaggingService();
 
+  static final SentimentService sentiment = CloudRunSentimentService();
+
   static final PinService pins = SupabasePinService(
     client: _client,
     auth: auth,
     points: points,
     photoTagging: photoTagging,
+    sentiment: sentiment,
   );
 
   static final FogService fog = SupabaseFogService(client: _client, auth: auth);
