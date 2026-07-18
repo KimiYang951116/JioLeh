@@ -122,6 +122,7 @@ The app requires these `--dart-define` values:
 | `SUPABASE_ANON_KEY` | Supabase client anon key |
 | `GOOGLE_PLACES_API_KEY` | Google Places API (nearby place suggestions) |
 | `GOOGLE_VISION_API_KEY` | Google Cloud Vision API (AI photo tagging) |
+| `SENTIMENT_API_KEY` | Cloud Run review sentiment classifier |
 
 Run the app:
 
@@ -132,7 +133,8 @@ flutter run \
   --dart-define=SUPABASE_URL="your-supabase-url" \
   --dart-define=SUPABASE_ANON_KEY="your-supabase-anon-key" \
   --dart-define=GOOGLE_PLACES_API_KEY="your-google-places-api-key" \
-  --dart-define=GOOGLE_VISION_API_KEY="your-google-vision-api-key"
+  --dart-define=GOOGLE_VISION_API_KEY="your-google-vision-api-key" \
+  --dart-define=SENTIMENT_API_KEY="your-sentiment-api-key"
 ```
 
 PowerShell:
@@ -144,7 +146,8 @@ flutter run `
   --dart-define=SUPABASE_URL="your-supabase-url" `
   --dart-define=SUPABASE_ANON_KEY="your-supabase-anon-key" `
   --dart-define=GOOGLE_PLACES_API_KEY="your-google-places-api-key" `
-  --dart-define=GOOGLE_VISION_API_KEY="your-google-vision-api-key"
+  --dart-define=GOOGLE_VISION_API_KEY="your-google-vision-api-key" `
+  --dart-define=SENTIMENT_API_KEY="your-sentiment-api-key"
 ```
 
 Do not commit real secrets.

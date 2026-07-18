@@ -173,6 +173,16 @@ class _SharedPlaceDetailsSheetState extends State<SharedPlaceDetailsSheet> {
       PlacePhotoStrip(photoUrls: _model.allPhotoUrls),
       if (_model.allPhotoUrls.isNotEmpty) const SizedBox(height: 16),
       _buildHeader(),
+      if (_model.positivePercent != null) ...[
+        const SizedBox(height: 4),
+        Text(
+          '${_model.positivePercent}% positive · ${_model.sentimentReviewCount} reviews',
+          style: TextStyle(
+            fontSize: context.scaledFont(AppTextSizes.label),
+            color: AppColors.lightSubtitle,
+          ),
+        ),
+      ],
       if (_model.allTags.isNotEmpty) ...[
         const SizedBox(height: 8),
         TagChipRow(tags: _model.allTags, scrollable: true),

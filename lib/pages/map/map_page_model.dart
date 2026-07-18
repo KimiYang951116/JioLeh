@@ -63,6 +63,9 @@ class MapPageModel extends ChangeNotifier {
 
       _updateLocationName(position);
       await reloadPlaces();
+      // Classify unclassified reviews in the background, don't await it. 
+      // This is a best-effort operation that can be retried later if it fails.
+      unawaited(pins.classifyUnclassifiedReviews());
       await location.startLocationTracking(onLocationUpdate: _onLocationUpdate);
     } catch (_) {
       if (_disposed) return;

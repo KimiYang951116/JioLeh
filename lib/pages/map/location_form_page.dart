@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -30,6 +31,11 @@ Future<LocationFormResult?> showLocationFormPage(
   double? longitude,
   Future<void> Function(LocationFormResult result)? onSave,
 }) {
+  if (!isReadOnly) {
+    // Warm up the sentiment classifier in the background, don't await it.
+    // This is a best-effort operation that can be retried later if it fails.
+    unawaited(ServiceProvider.of(context)?.sentiment.warmUp());
+  }
   return Navigator.of(context).push<LocationFormResult>(
     MaterialPageRoute(
       builder: (_) => LocationFormPage(
