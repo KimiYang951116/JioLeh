@@ -1,3 +1,5 @@
+enum PinSentiment { positive, negative, mixed }
+
 class UserPin {
   final String? id;
   final String userId;
@@ -9,6 +11,8 @@ class UserPin {
   final List<String> photoPaths;
   final List<String> aiTags;
   final bool isPrivate;
+  final String? sentimentLabel;
+  final double? sentimentScore;
 
   const UserPin({
     this.id,
@@ -21,6 +25,8 @@ class UserPin {
     this.photoPaths = const [],
     this.aiTags = const [],
     this.isPrivate = false,
+    this.sentimentLabel,
+    this.sentimentScore,
   });
 
   factory UserPin.fromMap(Map<String, dynamic> map) {
@@ -40,6 +46,19 @@ class UserPin {
       aiTags:
           rawAiTags?.map((tag) => tag.toString()).toList() ?? const [],
       isPrivate: map['is_private'] as bool? ?? false,
+      sentimentLabel: map['sentiment_label'] as String?,
+      sentimentScore: (map['sentiment_score'] as num?)?.toDouble(),
     );
+  }
+
+  static const double sentimentConfidenceThreshold = 0.8;
+
+  PinSentiment? get sentiment {
+    if (sentimentLabel == null || sentimentScore == null) return null;
+    if (sentimentScore! < sentimentConfidenceThreshold) {
+      return PinSentiment.mixed;
+    }
+    if (sentimentLabel == 'POSITIVE') return PinSentiment.positive;
+    return PinSentiment.negative;
   }
 }

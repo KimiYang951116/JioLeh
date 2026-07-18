@@ -39,6 +39,10 @@ class AppColors {
 
   // Tinted mint surface for the place preview box on jio cards.
   static const mintSection = Color(0xFFD9EDDC);
+
+  static const sentimentPositive = Color(0xFF2E7D32);
+  static const sentimentNegative = Color(0xFFC62828);
+  static const sentimentMixed = Color(0xFF616161);
 }
 
 class LogoColors {

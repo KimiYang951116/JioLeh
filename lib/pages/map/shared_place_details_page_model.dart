@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'package:jio_leh/models/place.dart';
+import 'package:jio_leh/models/user_pin.dart';
 import 'package:jio_leh/pages/map/models/friend_pin_entry.dart';
 import 'package:jio_leh/services/account_service.dart';
 import 'package:jio_leh/services/auth_service.dart';
@@ -55,6 +56,28 @@ class SharedPlaceDetailsPageModel extends ChangeNotifier {
     ];
     if (ratings.isEmpty) return null;
     return ratings.reduce((a, b) => a + b) / ratings.length;
+  }
+
+  List<PinSentiment> get _classifiedSentiments {
+    final classified = <PinSentiment>[];
+    for (final entry in _entries) {
+      final sentiment = entry.pin.sentiment;
+      if (sentiment != null && sentiment != PinSentiment.mixed) {
+        classified.add(sentiment);
+      }
+    }
+    return classified;
+  }
+
+  int get sentimentReviewCount => _classifiedSentiments.length;
+
+  int? get positivePercent {
+    final classified = _classifiedSentiments;
+    if (classified.isEmpty) return null;
+    final positive = classified
+        .where((sentiment) => sentiment == PinSentiment.positive)
+        .length;
+    return (positive * 100 / classified.length).round();
   }
 
   Future<void> load() async {

@@ -4,6 +4,7 @@ import 'package:jio_leh/models/user_pin.dart';
 import 'package:jio_leh/models/user_profile.dart';
 import 'package:jio_leh/theme.dart';
 import 'package:jio_leh/widgets/app_avatar.dart';
+import 'package:jio_leh/widgets/sentiment_chip.dart';
 
 /// One friend's rating, review, and photos for a shared place, shown on
 /// [SharedPlaceDetailsPage]. [profile] is null if the friend's profile
@@ -28,6 +29,7 @@ class FriendPinCard extends StatelessWidget {
     final hasAvatar = avatarUrl != null && avatarUrl.isNotEmpty;
     final rating = pin.rating ?? 0;
     final review = pin.review?.trim() ?? '';
+    final sentiment = pin.sentiment;
 
     return Card(
       margin: EdgeInsets.zero,
@@ -83,6 +85,10 @@ class FriendPinCard extends StatelessWidget {
                     color: Colors.amber,
                     size: 20,
                   ),
+                if (sentiment != null) ...[
+                  const Spacer(),
+                  SentimentChip(sentiment: sentiment),
+                ],
               ],
             ),
             const SizedBox(height: 8),

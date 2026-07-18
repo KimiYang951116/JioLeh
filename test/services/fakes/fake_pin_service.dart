@@ -152,4 +152,11 @@ class FakePinService extends PinService {
     lastLoadPlaceById = placeId;
     return loadPlaceByIdResult;
   }
+
+  int classifyUnclassifiedReviewsCalls = 0;
+
+  @override
+  Future<void> classifyUnclassifiedReviews() async {
+    classifyUnclassifiedReviewsCalls++;
+  }
 }

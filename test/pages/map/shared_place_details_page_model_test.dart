@@ -8,8 +8,20 @@ import '../../services/fakes/fake_account_service.dart';
 import '../../services/fakes/fake_auth_service.dart';
 import '../../services/fakes/fake_pin_service.dart';
 
-UserPin _pin(String userId, {int? rating, List<String> tags = const []}) =>
-    UserPin(userId: userId, emoji: '🍽️', rating: rating, aiTags: tags);
+UserPin _pin(
+  String userId, {
+  int? rating,
+  List<String> tags = const [],
+  String? sentimentLabel,
+  double? sentimentScore,
+}) => UserPin(
+  userId: userId,
+  emoji: '🍽️',
+  rating: rating,
+  aiTags: tags,
+  sentimentLabel: sentimentLabel,
+  sentimentScore: sentimentScore,
+);
 
 Place _place(List<UserPin> pins) =>
     Place(name: 'Test Place', latitude: 1.3, longitude: 103.8, pins: pins);
@@ -114,6 +126,82 @@ void main() {
       await model.load();
 
       expect(model.allTags, isEmpty);
+    });
+  });
+
+  group('positivePercent', () {
+    test('is null when no reviews are classified', () async {
+      final model = _buildModel(_place([_pin('a'), _pin('b')]));
+      await model.load();
+
+      expect(model.positivePercent, isNull);
+      expect(model.sentimentReviewCount, 0);
+    });
+
+    test('is 100 when only one review is classified and it is positive', () async {
+      final model = _buildModel(
+        _place([
+          _pin('a', sentimentLabel: 'POSITIVE', sentimentScore: 0.9),
+          _pin('b'),
+        ]),
+      );
+      await model.load();
+
+      expect(model.positivePercent, 100);
+      expect(model.sentimentReviewCount, 1);
+    });
+
+    test('is 100 when exactly two classified reviews are both positive', () async {
+      final model = _buildModel(
+        _place([
+          _pin('a', sentimentLabel: 'POSITIVE', sentimentScore: 0.9),
+          _pin('b', sentimentLabel: 'POSITIVE', sentimentScore: 0.8),
+        ]),
+      );
+      await model.load();
+
+      expect(model.positivePercent, 100);
+      expect(model.sentimentReviewCount, 2);
+    });
+
+    test('excludes mixed and unclassified reviews', () async {
+      final model = _buildModel(
+        _place([
+          _pin('a', sentimentLabel: 'POSITIVE', sentimentScore: 0.9),
+          _pin('b', sentimentLabel: 'POSITIVE', sentimentScore: 0.8),
+          _pin('c', sentimentLabel: 'NEGATIVE', sentimentScore: 0.5),
+          _pin('d'),
+        ]),
+      );
+      await model.load();
+
+      expect(model.positivePercent, 100);
+      expect(model.sentimentReviewCount, 2);
+    });
+
+    test('rounds two-thirds positive to 67', () async {
+      final model = _buildModel(
+        _place([
+          _pin('a', sentimentLabel: 'POSITIVE', sentimentScore: 0.9),
+          _pin('b', sentimentLabel: 'POSITIVE', sentimentScore: 0.8),
+          _pin('c', sentimentLabel: 'NEGATIVE', sentimentScore: 0.9),
+        ]),
+      );
+      await model.load();
+
+      expect(model.positivePercent, 67);
+    });
+
+    test('is 0 when all classified reviews are negative', () async {
+      final model = _buildModel(
+        _place([
+          _pin('a', sentimentLabel: 'NEGATIVE', sentimentScore: 0.9),
+          _pin('b', sentimentLabel: 'NEGATIVE', sentimentScore: 0.8),
+        ]),
+      );
+      await model.load();
+
+      expect(model.positivePercent, 0);
     });
   });
 }
